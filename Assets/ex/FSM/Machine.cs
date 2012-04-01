@@ -269,7 +269,7 @@ namespace fsm {
             showDebugInfo = GUILayout.Toggle( showDebugInfo, "Show States" );
             logDebugInfo = GUILayout.Toggle( logDebugInfo, "Log States" );
                 if ( showDebugInfo ) {
-                    y = ShowDebugInfo ( x, y, 0, true );
+                    ShowDebugInfo ( 0, true, _textStyle );
                 }
         }
     }

@@ -38,11 +38,20 @@ class FSMDebugger : EditorWindow {
     ///////////////////////////////////////////////////////////////////////////////
 
     // ------------------------------------------------------------------ 
+    // Desc: 
+    // NOTE: you should inherit the FSMDebugger and override this
+    // ------------------------------------------------------------------ 
+
+    protected virtual fsm.Machine GetStateMachine ( GameObject _go ) {
+        return null;
+    }
+
+    // ------------------------------------------------------------------ 
     /// \return the editor
     /// Open the animation debug window
     // ------------------------------------------------------------------ 
 
-    [MenuItem ("CityOS/Debugger/FSM Debugger")]
+    [MenuItem ("ex/Debugger/FSM Debugger")]
     public static FSMDebugger NewWindow () {
         FSMDebugger newWindow = EditorWindow.GetWindow<FSMDebugger>();
         return newWindow;
@@ -52,7 +61,7 @@ class FSMDebugger : EditorWindow {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-    void OnEnable () {
+    protected void OnEnable () {
         textStyle.alignment = TextAnchor.MiddleLeft;
         name = "FSM Debugger";
         wantsMouseMove = false;
@@ -75,13 +84,10 @@ class FSMDebugger : EditorWindow {
         if ( _obj is GameObject == false ) {
             return;
         }
-        // TODO: make hook { 
-        // GameObject go = _obj as GameObject;
-        // Creature creatureComp = go.GetComponent<Creature>();
-        // if ( creatureComp == null )
-        //     return;
-        // fsm.Machine machine = creatureComp.stateMachine;
-        // } TODO end 
+
+        //
+        GameObject go = _obj as GameObject;
+        fsm.Machine machine = GetStateMachine (go);
 
         // check if repaint
         if ( curEdit != machine ) {
