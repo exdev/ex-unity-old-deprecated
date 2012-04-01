@@ -224,7 +224,7 @@ namespace fsm {
 
         public void EnterStates ( Event _event, State _toEnter, State _toExit ) {
             currentStates.Add (_toEnter);
-            if ( machine != null && machine.debug && machine.logDebugInfo ) 
+            if ( machine != null && machine.logDebugInfo ) 
                 Debug.Log( "FSM Debug: Enter State - " + _toEnter.name + " at " + Time.time );
             _toEnter.OnEnter ( _toExit, _toEnter, _event );
 
@@ -251,7 +251,7 @@ namespace fsm {
 
         public void ExitStates ( Event _event, State _toEnter, State _toExit ) {
             _toExit.ExitAllStates ( _event, _toEnter );
-            if ( machine != null && machine.debug && machine.logDebugInfo ) 
+            if ( machine != null && machine.logDebugInfo ) 
                 Debug.Log( "FSM Debug: Exit State - " + _toExit.name + " at " + Time.time );
             _toExit.OnExit ( _toExit, _toEnter, _event );
             currentStates.Remove (_toExit);
@@ -265,7 +265,7 @@ namespace fsm {
             foreach ( State activeChild in currentStates ) {
                 activeChild.ExitAllStates ( _event, _toEnter );
                 activeChild.OnExit ( activeChild, _toEnter, _event );
-                if ( machine != null && machine.debug && machine.logDebugInfo ) 
+                if ( machine != null && machine.logDebugInfo ) 
                     Debug.Log( "FSM Debug: Exit State - " + activeChild.name + " at " + Time.time );
             }
             currentStates.Clear();
@@ -307,18 +307,16 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public float ShowDebugInfo ( float _x, float _y, int _level, bool _active ) {
-            float y = _y;
-            float x = _x + _level * 5;
-
-            GUI.color = _active ? Color.green : Color.red;
-            GUI.Label ( new Rect ( x, y, 200, 22 ), name );
-            y += 22.0f;
+        public void ShowDebugInfo ( int _level, bool _active, GUIStyle _textStyle ) {
+            _textStyle.normal.textColor = _active ? Color.green : new Color( 0.5f, 0.5f, 0.5f );
+            GUILayout.BeginHorizontal ();
+                GUILayout.Space(5);
+                GUILayout.Label ( new string('\t',_level) + name, _textStyle, new GUILayoutOption[] {} );
+            GUILayout.EndHorizontal ();
 
             foreach ( State s in children ) {
-                y = s.ShowDebugInfo ( x, y, _level + 1, currentStates.IndexOf(s) != -1 );
+                s.ShowDebugInfo ( _level + 1, currentStates.IndexOf(s) != -1, _textStyle );
             }
-            return y;
         }
     }
 

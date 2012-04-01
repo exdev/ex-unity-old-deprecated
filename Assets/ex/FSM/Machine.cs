@@ -31,8 +31,7 @@ namespace fsm {
         public delegate void OnEventHandler ();
 
         // DEBUG { 
-        public bool debug = false;
-        public bool showDebugInfo = false;
+        public bool showDebugInfo = true;
         public bool logDebugInfo = false;
         // } DEBUG end 
 
@@ -265,29 +264,13 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public float ShowDebugGUI ( string _name, float _x, float _y ) {
-            if ( debug == false )
-                return _y;
-
-            float x = _x;
-            float y = _y + 5.0f;
-
-            Color oldColor = GUI.color;
-                float boxHeight =  showDebugInfo ? TotalStates() * 22.0f : 0.0f;
-                boxHeight += 22.0f * 2.0f;
-                GUI.Box ( new Rect ( x - 10.0f, y, 200.0f, boxHeight ), GUIContent.none );
-
-                showDebugInfo = GUI.Toggle( new Rect( x, y, 200, 22 ), showDebugInfo, "(" + _name + ") Debug State Machine" );
-                y += 22.0f;
-                logDebugInfo = GUI.Toggle( new Rect( x, y, 200, 22 ), logDebugInfo, "Log State Machine" );
-                y += 22.0f;
-
+        public void ShowDebugGUI ( string _name, GUIStyle _textStyle ) {
+            GUILayout.Label( "State Machine (" + _name + ")" );
+            showDebugInfo = GUILayout.Toggle( showDebugInfo, "Show States" );
+            logDebugInfo = GUILayout.Toggle( logDebugInfo, "Log States" );
                 if ( showDebugInfo ) {
                     y = ShowDebugInfo ( x, y, 0, true );
                 }
-            GUI.color = oldColor;
-
-            return y;
         }
     }
 }
