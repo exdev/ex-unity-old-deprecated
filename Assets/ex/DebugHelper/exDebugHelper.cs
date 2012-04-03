@@ -35,7 +35,9 @@ public class exDebugHelper : MonoBehaviour {
     // ------------------------------------------------------------------ 
 
     public static void ScreenPrint ( string _text ) {
-        instance.txtPrint.text = instance.txtPrint.text + _text + "\n"; 
+        if ( instance.showScreenPrint_ ) {
+            instance.txtPrint.text = instance.txtPrint.text + _text + "\n"; 
+        }
     }
 
     // ------------------------------------------------------------------ 

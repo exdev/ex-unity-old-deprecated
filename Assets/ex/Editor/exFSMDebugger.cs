@@ -1,7 +1,7 @@
 // ======================================================================================
-// File         : FSMDebugger.cs
+// File         : exFSMDebugger.cs
 // Author       : Wu Jie 
-// Last Change  : 04/01/2012 | 14:33:33 PM | Sunday,April
+// Last Change  : 04/02/2012 | 00:44:48 AM | Monday,April
 // Description  : 
 // ======================================================================================
 
@@ -21,7 +21,7 @@ using System.Collections.Generic;
 ///
 ///////////////////////////////////////////////////////////////////////////////
 
-class FSMDebugger : EditorWindow {
+class exFSMDebugger : EditorWindow {
 
     ///////////////////////////////////////////////////////////////////////////////
     // members
@@ -39,7 +39,7 @@ class FSMDebugger : EditorWindow {
 
     // ------------------------------------------------------------------ 
     // Desc: 
-    // NOTE: you should inherit the FSMDebugger and override this
+    // NOTE: you should inherit the exFSMDebugger and override this
     // ------------------------------------------------------------------ 
 
     protected virtual fsm.Machine GetStateMachine ( GameObject _go ) {
@@ -52,8 +52,8 @@ class FSMDebugger : EditorWindow {
     // ------------------------------------------------------------------ 
 
     [MenuItem ("ex/Debugger/FSM Debugger")]
-    public static FSMDebugger NewWindow () {
-        FSMDebugger newWindow = EditorWindow.GetWindow<FSMDebugger>();
+    public static exFSMDebugger NewWindow () {
+        exFSMDebugger newWindow = EditorWindow.GetWindow<exFSMDebugger>();
         return newWindow;
     }
 
