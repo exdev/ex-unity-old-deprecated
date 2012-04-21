@@ -1,3 +1,9 @@
 exUnity is a collection of scripts I wrote to help me developing Unity3D games.
 
+Usage:
+
+    1. Create a new Unity project.
+    2. Create Assets/ex/ folder
+    3. Go to Assets/ex/ folder and run "git clone git@github.com:jwu/exUnity.git" 
+
 WebSite: http://www.ex-dev.com
