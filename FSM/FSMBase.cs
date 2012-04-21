@@ -41,5 +41,13 @@ public class FSMBase : MonoBehaviour {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+    public virtual void Reset () {
+        stateMachine.Restart();
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
     protected virtual void InitStateMachine () {}
 }

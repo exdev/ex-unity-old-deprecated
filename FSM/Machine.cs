@@ -71,6 +71,15 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
+        public void Restart () {
+            Stop ();
+            Start ();
+        }
+
+        // ------------------------------------------------------------------ 
+        // Desc: 
+        // ------------------------------------------------------------------ 
+
         public void Start () {
             if ( machineState == MachineState.Running ||
                  machineState == MachineState.Paused )
