@@ -1,7 +1,7 @@
 // ======================================================================================
-// File         : exStaticDebugger.cs
+// File         : FSMBase.cs
 // Author       : Wu Jie 
-// Last Change  : 02/19/2012 | 21:20:42 PM | Sunday,February
+// Last Change  : 04/19/2012 | 23:18:35 PM | Thursday,April
 // Description  : 
 // ======================================================================================
 
@@ -11,23 +11,35 @@
 
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 ///////////////////////////////////////////////////////////////////////////////
-// defines
+// \class FSMBase 
+// 
+// \brief 
+// 
 ///////////////////////////////////////////////////////////////////////////////
 
-public class exStaticDebugger {
+public class FSMBase : MonoBehaviour {
 
     ///////////////////////////////////////////////////////////////////////////////
-    //
+    // non-serialized
     ///////////////////////////////////////////////////////////////////////////////
 
-    public static void Assert ( bool _condition, string _msg, bool _break = false ) {
-        if ( _condition == false ) {
-            Debug.LogError ( "Assert Failed: " + _msg );
-            if ( _break )
-                Debug.Break ();
-        }
-    } 
+    [System.NonSerialized] public fsm.Machine stateMachine;
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    protected void Awake () {
+        stateMachine = new fsm.Machine();
+        InitStateMachine ();
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    protected virtual void InitStateMachine () {}
 }
-

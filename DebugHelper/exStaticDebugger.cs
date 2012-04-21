@@ -1,7 +1,7 @@
 // ======================================================================================
-// File         : Event.cs
+// File         : exStaticDebugger.cs
 // Author       : Wu Jie 
-// Last Change  : 12/20/2011 | 14:10:24 PM | Tuesday,December
+// Last Change  : 02/19/2012 | 21:20:42 PM | Sunday,February
 // Description  : 
 // ======================================================================================
 
@@ -16,27 +16,18 @@ using System.Collections;
 // defines
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace fsm {
+public static class exStaticDebugger {
 
     ///////////////////////////////////////////////////////////////////////////////
-    // Event
+    //
     ///////////////////////////////////////////////////////////////////////////////
 
-    public class Event : System.EventArgs {
-        public const int UNKNOWN = -1; 
-        public const int NULL = 0;
-        public const int NEXT = 1;
-        public const int TRIGGER = 2;
-        public const int FINISHED = 3;
-        public const int USER_FIELD = 1000;
-
-        // properties
-        public int id = UNKNOWN;
-
-        // functions
-        public Event ( int _id = -1 ) {
-            id = _id;
+    public static void Assert ( bool _condition, string _msg, bool _break = false ) {
+        if ( _condition == false ) {
+            Debug.LogError ( "Assert Failed: " + _msg );
+            if ( _break )
+                Debug.Break ();
         }
-    }
+    } 
 }
 

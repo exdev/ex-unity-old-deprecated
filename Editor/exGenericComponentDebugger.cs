@@ -62,10 +62,10 @@ class exGenericComponentDebugger<T> : EditorWindow
     // ------------------------------------------------------------------ 
 
     public void Debug ( Object _obj ) {
-        if ( _obj is GameObject == false ) {
+        GameObject go = _obj as GameObject;
+        if ( go == null ) {
             return;
         }
-        GameObject go = _obj as GameObject;
         T comp = go.GetComponent<T>();
         if ( comp == null )
             return;

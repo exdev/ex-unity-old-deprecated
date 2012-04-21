@@ -43,6 +43,9 @@ class exFSMDebugger : EditorWindow {
     // ------------------------------------------------------------------ 
 
     protected virtual fsm.Machine GetStateMachine ( GameObject _go ) {
+        FSMBase fsm = _go.GetComponent<FSMBase>();
+        if ( fsm != null )
+            return fsm.stateMachine;
         return null;
     }
 
@@ -81,12 +84,12 @@ class exFSMDebugger : EditorWindow {
     // ------------------------------------------------------------------ 
 
     public void Debug ( Object _obj ) {
-        if ( _obj is GameObject == false ) {
+        GameObject go = _obj as GameObject;
+        if ( go == null ) {
             return;
         }
 
         //
-        GameObject go = _obj as GameObject;
         fsm.Machine machine = GetStateMachine (go);
 
         // check if repaint
