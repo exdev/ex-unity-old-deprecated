@@ -170,7 +170,6 @@ public class exTimebasedCurve {
             }
         }
 
-
         //
         float ratio = Mathf.Clamp ( wrappedTime/duration, 0.0f, 1.0f );
         return callback(ratio);
