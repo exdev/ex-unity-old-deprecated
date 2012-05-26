@@ -53,6 +53,7 @@ namespace fsm {
         protected int curEventBufferIdx = 0; 
         protected int nextEventBufferIdx = 1; 
         protected bool isUpdating = false; 
+        protected List<Transition> validTransitions = new List<Transition>(); 
 
         ///////////////////////////////////////////////////////////////////////////////
         // functions
@@ -99,8 +100,8 @@ namespace fsm {
                 }
             }
             else { // if ( _toEnter.mode == State.Mode.Parallel )
-                foreach ( State child in children ) {
-                    EnterStates( nullEvent, child, startState );
+                for ( int i = 0; i < children.Count; ++i ) {
+                    EnterStates( nullEvent, children[i], startState );
                 }
             }
         }
@@ -158,9 +159,9 @@ namespace fsm {
                 bool doStop = false;
                 List<Event> eventList = eventBuffer[curEventBufferIdx];
                 // Debug.Log( "eventList [" + curEventBufferIdx + "] = " + eventList.Count );
-                foreach ( Event ent in eventList ) {
+                for ( int i = 0; i < eventList.Count; ++i ) {
                     // if we can stop the machine, ignore rest events and do stop
-                    if ( HandleEvent (ent) ) {
+                    if ( HandleEvent (eventList[i]) ) {
                         doStop = true;
                         break;
                     }
@@ -200,7 +201,7 @@ namespace fsm {
             OnEvent (_event);
 
             // 
-            List<Transition> validTransitions = new List<Transition>(); 
+            validTransitions.Clear();
             TestTransitions ( ref validTransitions, _event );
 
             //
@@ -211,8 +212,8 @@ namespace fsm {
             // check if we need to stop the stateMachine
             if ( _event.id == Event.FINISHED ) {
                 bool canStop = true;
-                foreach ( State state in currentStates ) {
-                    if ( (state is FinalState) == false ) {
+                for ( int i = 0; i < currentStates.Count; ++i ) {
+                    if ( (currentStates[i] is FinalState) == false ) {
                         canStop = false;
                         break;
                     }
@@ -241,7 +242,8 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         protected void EnterStates ( Event _event, List<Transition> _transitionList ) {
-            foreach ( Transition transition in _transitionList ) {
+            for ( int i = 0; i < _transitionList.Count; ++i ) {
+                Transition transition = _transitionList[i];
                 State targetState = transition.target;
                 if ( targetState == null )
                     targetState = transition.source;
@@ -254,7 +256,8 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         protected void ExitStates ( Event _event, List<Transition> _transitionList ) {
-            foreach ( Transition transition in _transitionList ) {
+            for ( int i = 0; i < _transitionList.Count; ++i ) {
+                Transition transition = _transitionList[i];
                 transition.source.parent.ExitStates ( _event, transition.target, transition.source );
             }
         }
@@ -264,7 +267,8 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         protected void ExecTransitions ( Event _event, List<Transition> _transitionList ) {
-            foreach ( Transition transition in _transitionList ) {
+            for ( int i = 0; i < _transitionList.Count; ++i ) {
+                Transition transition = _transitionList[i];
                 transition.OnTransition (_event);
             }
         }

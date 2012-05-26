@@ -144,8 +144,8 @@ namespace fsm {
 
         public void ClearCurrentStatesRecursively () {
             currentStates.Clear();
-            foreach ( State child in children ) {
-                child.ClearCurrentStatesRecursively ();
+            for ( int i = 0; i < children.Count; ++i ) {
+                children[i].ClearCurrentStatesRecursively ();
             }
         }
 
@@ -179,8 +179,13 @@ namespace fsm {
             if ( onAction != null ) { 
                 onAction ( this );         
             } 
-            foreach ( State activeChild in currentStates ) {
-                activeChild.OnAction ();
+            for ( int i = 0; i < currentStates.Count; ++i ) {
+                currentStates[i].OnAction ();
+
+                // TEMP { 
+                // if ( machine != null && machine.logDebugInfo ) 
+                //     Debug.Log( "FSM Debug: On Action - " + currentStates[i].name + " at " + Time.time );
+                // } TEMP end 
             }
         } 
 
@@ -192,8 +197,8 @@ namespace fsm {
             if ( onEvent != null ) { 
                 onEvent ( this, _event );         
             } 
-            foreach ( State activeChild in currentStates ) {
-                activeChild.OnEvent (_event);
+            for ( int i = 0; i < currentStates.Count; ++i ) {
+                currentStates[i].OnEvent (_event);
             }
         }
 
@@ -202,10 +207,13 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         public void TestTransitions ( ref List<Transition> _validTransitions, Event _event ) {
-            foreach ( State activeChild in currentStates ) {
+            for ( int i = 0; i < currentStates.Count; ++i ) {
+                State activeChild = currentStates[i];
+
                 // NOTE: if parent transition triggerred, the child should always execute onExit transition
                 bool hasTranstion = false;
-                foreach ( Transition transition in activeChild.transitionList ) {
+                for ( int j = 0; j < activeChild.transitionList.Count; ++j ) {
+                    Transition transition = activeChild.transitionList[j];
                     if ( transition.TestEvent (_event) ) {
                         _validTransitions.Add (transition);
                         hasTranstion = true;
@@ -238,8 +246,8 @@ namespace fsm {
                     }
                 }
                 else { // if ( _toEnter.mode == State.Mode.Parallel )
-                    foreach ( State child in _toEnter.children ) {
-                        _toEnter.EnterStates( _event, child, _toExit );
+                    for ( int i = 0; i < _toEnter.children.Count; ++i ) {
+                        _toEnter.EnterStates( _event, _toEnter.children[i], _toExit );
                     }
                 }
             }
@@ -262,7 +270,8 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         protected void ExitAllStates ( Event _event, State _toEnter ) {
-            foreach ( State activeChild in currentStates ) {
+            for ( int i = 0; i < currentStates.Count; ++i ) {
+                State activeChild = currentStates[i];
                 activeChild.ExitAllStates ( _event, _toEnter );
                 activeChild.OnExit ( activeChild, _toEnter, _event );
                 if ( machine != null && machine.logDebugInfo ) 
@@ -297,8 +306,8 @@ namespace fsm {
 
         public int TotalStates () {
             int count = 1;
-            foreach ( State s in children ) {
-                count += s.TotalStates();
+            for ( int i = 0; i < children.Count; ++i ) {
+                count += children[i].TotalStates();
             }
             return count;
         }
@@ -314,7 +323,8 @@ namespace fsm {
                 GUILayout.Label ( new string('\t',_level) + name, _textStyle, new GUILayoutOption[] {} );
             GUILayout.EndHorizontal ();
 
-            foreach ( State s in children ) {
+            for ( int i = 0; i < children.Count; ++i ) {
+                State s = children[i];
                 s.ShowDebugInfo ( _level + 1, currentStates.IndexOf(s) != -1, _textStyle );
             }
         }

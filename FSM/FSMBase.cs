@@ -42,7 +42,8 @@ public class FSMBase : MonoBehaviour {
     // ------------------------------------------------------------------ 
 
     public virtual void Reset () {
-        stateMachine.Restart();
+        if ( stateMachine != null )
+            stateMachine.Restart();
     }
 
     // ------------------------------------------------------------------ 

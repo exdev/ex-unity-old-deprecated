@@ -73,6 +73,7 @@ public class exTimebasedCurve {
     private float lastTime = 0.0f; 
     private bool timeup = false;
     private bool started = false;
+    private float duration = 0.0f;
 
     ///////////////////////////////////////////////////////////////////////////////
     // functions
@@ -82,12 +83,14 @@ public class exTimebasedCurve {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-    public void Start ( bool _rewind = false ) {
+    public void Start ( bool _rewind = false, float _duration = -1.0f ) {
+        duration = (_duration <= 0.0f) ? data.length : _duration;
+
         callback = data.useEaseCurve ? exEase.TypeToFunction(data.easeCurveType) : data.animationCurve.Evaluate;
         lastTime = data.useRealTime ? Time.realtimeSinceStartup : Time.time;
         if ( _rewind || started == false ) {
             if ( inverse )
-                time = data.length;
+                time = duration;
             else
                 time = 0.0f;
         }
@@ -151,7 +154,7 @@ public class exTimebasedCurve {
 
         // check if stop
         if ( data.wrapMode == exTimebasedCurveInfo.WrapMode.Once ) {
-            if ( (!inverse && time >= data.length) ||
+            if ( (!inverse && time >= duration) ||
                  (inverse && time <= 0.0f) )
             {
                 timeup = true;
@@ -161,7 +164,7 @@ public class exTimebasedCurve {
                     return 0.0f;
                 }
                 else {
-                    time = data.length;
+                    time = duration;
                     return 1.0f;
                 }
             }
@@ -169,7 +172,7 @@ public class exTimebasedCurve {
 
 
         //
-        float ratio = Mathf.Clamp ( wrappedTime/data.length, 0.0f, 1.0f );
+        float ratio = Mathf.Clamp ( wrappedTime/duration, 0.0f, 1.0f );
         return callback(ratio);
     }
 }
