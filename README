@@ -1,7 +1,6 @@
 exUnity is a collection of scripts I wrote to help me developing Unity3D games.
 
 Usage:
-
     1. Create a new Unity3D project.
     2. Go to Assets/ Directory.
     3. run "git submodule add git@github.com:jwu/exUnity.git Assets/ex/" 
