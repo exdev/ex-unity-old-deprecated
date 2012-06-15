@@ -50,12 +50,6 @@ public class exTimebasedCurveEditor : Editor {
         curEditTarget.length = EditorGUILayout.FloatField( "Length", curEditTarget.length );
 
         // ======================================================== 
-        // use real time 
-        // ======================================================== 
-
-        curEditTarget.useRealTime = EditorGUILayout.Toggle( "Use Real Time", curEditTarget.useRealTime );
-
-        // ======================================================== 
         // use ease curve 
         // ======================================================== 
 

@@ -30,7 +30,6 @@ public class exTimebasedCurveInfo : ScriptableObject {
 
     public WrapMode wrapMode = WrapMode.Once;
     public float length = 1.0f;
-    public bool useRealTime = false;
     public bool useEaseCurve = true;
     public exEase.Type easeCurveType = exEase.Type.Linear;
     public AnimationCurve animationCurve = AnimationCurve.Linear( 0.0f, 0.0f, 1.0f, 1.0f );
@@ -66,8 +65,8 @@ public class exTimebasedCurveInfo : ScriptableObject {
 public class exTimebasedCurve {
 
     public exTimebasedCurveInfo data;
+    public float speed = 1.0f;
 
-    private bool inverse = false;
     private exEase.easeCallback callback;
     private float time = 0.0f; 
     private float lastTime = 0.0f; 
@@ -87,9 +86,9 @@ public class exTimebasedCurve {
         duration = (_duration <= 0.0f) ? data.length : _duration;
 
         callback = data.useEaseCurve ? exEase.TypeToFunction(data.easeCurveType) : data.animationCurve.Evaluate;
-        lastTime = data.useRealTime ? Time.realtimeSinceStartup : Time.time;
+        lastTime = Time.time;
         if ( _rewind || started == false ) {
-            if ( inverse )
+            if ( speed < 0.0f )
                 time = duration;
             else
                 time = 0.0f;
@@ -103,7 +102,10 @@ public class exTimebasedCurve {
     // ------------------------------------------------------------------ 
 
     public void Inverse ( bool _enable ) {
-        inverse = _enable;
+        if ( _enable )
+            speed = Mathf.Abs ( speed ) * -1.0f;
+        else 
+            speed = Mathf.Abs ( speed );
     }
 
     // ------------------------------------------------------------------ 
@@ -125,6 +127,7 @@ public class exTimebasedCurve {
     // ------------------------------------------------------------------ 
 
     public float Step () {
+        bool inverse = (speed < 0.0f); 
         if ( timeup ) {
             if ( inverse )
                 return 0.0f;
@@ -140,14 +143,12 @@ public class exTimebasedCurve {
                 return 0.0f;
         }
 
-        float curTime = data.useRealTime ? Time.realtimeSinceStartup : Time.time;
+        float curTime = Time.time;
         float deltaTime = curTime - lastTime;
         lastTime = curTime;
 
         //
-        if ( inverse )
-            deltaTime = -deltaTime;
-        time += deltaTime;
+        time += deltaTime * speed;
 
         //
         float wrappedTime = data.WrapSeconds(time, data.wrapMode);
