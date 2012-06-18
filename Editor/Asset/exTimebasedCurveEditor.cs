@@ -21,7 +21,14 @@ using System.IO;
 [CustomEditor(typeof(exTimebasedCurveInfo))]
 public class exTimebasedCurveEditor : Editor {
 
-    private exTimebasedCurveInfo curEditTarget;
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    [MenuItem ("Assets/Create/ex/Timebased Curve Info")]
+    public static void CreateAsset () {
+        exGenericAssetUtility<exTimebasedCurveInfo>.CreateInCurrentDirectory("New CurveInfo");
+    }
 
     // ------------------------------------------------------------------ 
     // Desc: 
@@ -29,9 +36,8 @@ public class exTimebasedCurveEditor : Editor {
 
 	public override void OnInspectorGUI () {
         //
-        if ( target != curEditTarget ) {
-            curEditTarget = target as exTimebasedCurveInfo;
-        }
+        exTimebasedCurveInfo curEditTarget = target as exTimebasedCurveInfo;
+
 
         EditorGUIUtility.LookLikeInspector ();
         EditorGUI.indentLevel = 1;
