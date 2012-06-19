@@ -19,7 +19,14 @@ using System.IO;
 ///////////////////////////////////////////////////////////////////////////////
 
 [CustomEditor(typeof(exTimebasedCurveInfo))]
+[CanEditMultipleObjects]
 public class exTimebasedCurveEditor : Editor {
+
+    SerializedProperty wrapModeProp;
+    SerializedProperty lengthProp;
+    SerializedProperty useEaseCurveProp;
+    SerializedProperty easeCurveTypeProp;
+    SerializedProperty animationCurveProp;
 
     // ------------------------------------------------------------------ 
     // Desc: 
@@ -34,52 +41,31 @@ public class exTimebasedCurveEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+    void OnEnable () {
+        wrapModeProp = serializedObject.FindProperty ("wrapMode");
+        lengthProp = serializedObject.FindProperty ("length");
+        useEaseCurveProp = serializedObject.FindProperty ("useEaseCurve");
+        easeCurveTypeProp = serializedObject.FindProperty ("easeCurveType");
+        animationCurveProp = serializedObject.FindProperty ("animationCurve");
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
 	public override void OnInspectorGUI () {
-        //
-        exTimebasedCurveInfo curEditTarget = target as exTimebasedCurveInfo;
+        serializedObject.Update ();
 
+            EditorGUILayout.PropertyField (wrapModeProp);
+            EditorGUILayout.PropertyField (lengthProp);
+            EditorGUILayout.PropertyField (useEaseCurveProp);
 
-        EditorGUIUtility.LookLikeInspector ();
-        EditorGUI.indentLevel = 1;
+            GUI.enabled = useEaseCurveProp.boolValue;
+            EditorGUILayout.PropertyField (easeCurveTypeProp);
 
-        // ======================================================== 
-        // wrap mode 
-        // ======================================================== 
+            GUI.enabled = !useEaseCurveProp.boolValue;
+            EditorGUILayout.PropertyField (animationCurveProp);
 
-        curEditTarget.wrapMode = 
-            (exTimebasedCurveInfo.WrapMode)EditorGUILayout.EnumPopup( "Wrap Mode", curEditTarget.wrapMode );
-
-        // ======================================================== 
-        // length 
-        // ======================================================== 
-
-        curEditTarget.length = EditorGUILayout.FloatField( "Length", curEditTarget.length );
-
-        // ======================================================== 
-        // use ease curve 
-        // ======================================================== 
-
-        curEditTarget.useEaseCurve = EditorGUILayout.Toggle( "Use exEase Curve", curEditTarget.useEaseCurve );
-        GUI.enabled = curEditTarget.useEaseCurve;
-        EditorGUI.indentLevel = 2;
-        curEditTarget.easeCurveType = (exEase.Type)EditorGUILayout.EnumPopup( "exEase Curve Type", curEditTarget.easeCurveType );
-        EditorGUI.indentLevel = 1;
-        GUI.enabled = true;
-
-        // ======================================================== 
-        // animation curve
-        // ======================================================== 
-
-        GUI.enabled = !curEditTarget.useEaseCurve;
-        curEditTarget.animationCurve = EditorGUILayout.CurveField( "Animation Curve", curEditTarget.animationCurve );
-        GUI.enabled = true;
-
-        // ======================================================== 
-        // set dirty if anything changed
-        // ======================================================== 
-
-        if ( GUI.changed ) {
-            EditorUtility.SetDirty(curEditTarget);
-        }
+        serializedObject.ApplyModifiedProperties ();
     }
 }

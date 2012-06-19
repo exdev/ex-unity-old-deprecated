@@ -50,14 +50,12 @@ public class exAssetBundleConfigEditor : Editor {
     // ------------------------------------------------------------------ 
 
 	public override void OnInspectorGUI () {
-        EditorGUIUtility.LookLikeInspector ();
+        serializedObject.Update ();
 
-        EditorGUILayout.PropertyField (autoVersionProp);
-        EditorGUILayout.PropertyField (versionProp);
+            EditorGUILayout.PropertyField (autoVersionProp);
+            EditorGUILayout.PropertyField (versionProp);
+            EditorGUILayout.PropertyField (objInfoListProp);
 
-        EditorGUILayout.PropertyField (objInfoListProp);
-
-        // 
         serializedObject.ApplyModifiedProperties ();
     }
 
