@@ -55,6 +55,15 @@ public class exAssetBundleConfigEditor : Editor {
             EditorGUILayout.PropertyField (autoVersionProp);
             EditorGUILayout.PropertyField (versionProp);
             EditorGUILayout.PropertyField (objInfoListProp);
+            if ( objInfoListProp.isExpanded ) {
+                EditorGUI.indentLevel = 1;
+                EditorGUILayout.IntField ( "Size", objInfoListProp.arraySize);
+                for ( int i = 0; i < objInfoListProp.arraySize; ++i ) {
+                    SerializedProperty elementProp = objInfoListProp.GetArrayElementAtIndex(i);
+                    EditorGUILayout.PropertyField (elementProp);
+                }
+                EditorGUI.indentLevel = 0;
+            }
 
         serializedObject.ApplyModifiedProperties ();
     }
