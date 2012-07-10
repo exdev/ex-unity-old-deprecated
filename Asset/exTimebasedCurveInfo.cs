@@ -66,9 +66,9 @@ public class exTimebasedCurve {
 
     public exTimebasedCurveInfo data;
     public float speed = 1.0f;
+    [System.NonSerialized] public float time = 0.0f; 
 
     private exEase.easeCallback callback;
-    private float time = 0.0f; 
     private float lastTime = 0.0f; 
     private bool timeup = false;
     private bool started = false;
