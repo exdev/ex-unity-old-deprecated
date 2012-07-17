@@ -5,6 +5,8 @@
 // Description  : 
 // ======================================================================================
 
+#define EX2D
+
 ///////////////////////////////////////////////////////////////////////////////
 // usings
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,7 +23,9 @@ using System.Collections.Generic;
 // Desc: 
 // ------------------------------------------------------------------ 
 
+#if !EX2D
 [ExecuteInEditMode]
+#endif
 public class exDebugHelper : MonoBehaviour {
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +53,7 @@ public class exDebugHelper : MonoBehaviour {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-    public static void ScreenPrint ( Vector2 _pos, string _text ) {
+    public static void ScreenPrint ( Vector2 _pos, string _text, GUIStyle _style = null ) {
         if ( instance.showScreenDebugText ) {
 #if EX2D
             exSpriteFont debugText = instance.debugTextPool.Request<exSpriteFont>();
@@ -62,7 +66,7 @@ public class exDebugHelper : MonoBehaviour {
             debugText.text = _text;
             debugText.enabled = true;
 #else
-            TextInfo info = new TextInfo( _pos, _text ); 
+            TextInfo info = new TextInfo( _pos, _text, _style ); 
             instance.debugTextPool.Add(info);
 #endif
         }
@@ -90,6 +94,10 @@ public class exDebugHelper : MonoBehaviour {
     public exSpriteFont txtLog;
     public exGameObjectPool debugTextPool = new exGameObjectPool();
 #else 
+    public GUIStyle printStyle = null;
+    public GUIStyle fpsStyle = null;
+    public GUIStyle logStyle = null;
+
     protected string txtPrint = "screen print: ";
     protected string txtFPS = "fps: ";
     protected string txtLog = "log: ";
@@ -97,10 +105,12 @@ public class exDebugHelper : MonoBehaviour {
     public class TextInfo {
         public Vector2 screenPos = Vector2.zero;
         public string text;
+        public GUIStyle style = GUI.skin.label; 
 
-        public TextInfo ( Vector2 _screenPos, string _text ) {
+        public TextInfo ( Vector2 _screenPos, string _text, GUIStyle _style ) {
             screenPos = _screenPos;
             text = _text;
+            style = (_style == null) ? GUI.skin.label : _style;  
         }
     }
     protected List<TextInfo> debugTextPool = new List<TextInfo>();
@@ -234,28 +244,28 @@ public class exDebugHelper : MonoBehaviour {
 
         if ( showFps ) {
             content = new GUIContent(txtFPS);
-            size = GUI.skin.label.CalcSize(content);
-            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS );
+            size = fpsStyle.CalcSize(content);
+            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS, fpsStyle );
             curY += size.y;
         }
         if ( showScreenPrint ) {
             content = new GUIContent(txtPrint);
-            size = GUI.skin.label.CalcSize(content);
-            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtPrint );
+            size = printStyle.CalcSize(content);
+            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtPrint, printStyle );
         }
         if ( showScreenLog ) {
             content = new GUIContent(txtLog);
-            size = GUI.skin.label.CalcSize(content);
-            GUI.Label ( new Rect( Screen.width - 10.0f - size.x, Screen.height - 10.0f - size.y, size.x, size.y ), txtLog );
+            size = logStyle.CalcSize(content);
+            GUI.Label ( new Rect( Screen.width - 10.0f - size.x, Screen.height - 10.0f - size.y, size.x, size.y ), txtLog, logStyle );
         }
         if ( showScreenDebugText ) {
             for ( int i = 0; i < debugTextPool.Count; ++i ) {
                 TextInfo info = debugTextPool[i];
                 content = new GUIContent(info.text);
-                size = GUI.skin.label.CalcSize(content);
+                size = info.style.CalcSize(content);
 
                 Vector2 pos = new Vector2( info.screenPos.x, Screen.height - info.screenPos.y ) - size * 0.5f; 
-                GUI.Label ( new Rect( pos.x, pos.y, size.x, size.y ), info.text );
+                GUI.Label ( new Rect( pos.x, pos.y, size.x, size.y ), info.text, info.style );
             }
         }
     }

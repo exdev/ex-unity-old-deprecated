@@ -5,6 +5,8 @@
 // Description  : 
 // ======================================================================================
 
+#define EX2D
+
 ///////////////////////////////////////////////////////////////////////////////
 // usings
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +33,10 @@ public class exDebugHelperEditor : Editor {
     SerializedProperty txtPrintProp;
     SerializedProperty txtFPSProp;
     SerializedProperty txtLogProp;
+#else
+    SerializedProperty printStyleProp;
+    SerializedProperty fpsStyleProp;
+    SerializedProperty logStyleProp;
 #endif
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -50,6 +56,10 @@ public class exDebugHelperEditor : Editor {
         txtPrintProp = serializedObject.FindProperty ("txtPrint");
         txtFPSProp = serializedObject.FindProperty ("txtFPS");
         txtLogProp = serializedObject.FindProperty ("txtLog");
+#else
+        printStyleProp = serializedObject.FindProperty ("printStyle");
+        fpsStyleProp = serializedObject.FindProperty ("fpsStyle");
+        logStyleProp = serializedObject.FindProperty ("logStyle");
 #endif
     }
 
@@ -84,6 +94,10 @@ public class exDebugHelperEditor : Editor {
             EditorGUILayout.PropertyField (txtPrintProp);
             EditorGUILayout.PropertyField (txtFPSProp);
             EditorGUILayout.PropertyField (txtLogProp);
+#else
+            EditorGUILayout.PropertyField (printStyleProp, true);
+            EditorGUILayout.PropertyField (fpsStyleProp, true);
+            EditorGUILayout.PropertyField (logStyleProp, true);
 #endif
         serializedObject.ApplyModifiedProperties();
 
