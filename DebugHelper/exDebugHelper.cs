@@ -21,6 +21,7 @@ using System.Collections.Generic;
 // Desc: 
 // ------------------------------------------------------------------ 
 
+[ExecuteInEditMode]
 public class exDebugHelper : MonoBehaviour {
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +37,11 @@ public class exDebugHelper : MonoBehaviour {
 
     public static void ScreenPrint ( string _text ) {
         if ( instance.showScreenPrint_ ) {
+#if EX2D
             instance.txtPrint.text = instance.txtPrint.text + _text + "\n"; 
+#else
+            instance.txtPrint = instance.txtPrint + _text + "\n"; 
+#endif
         }
     }
 
@@ -46,6 +51,7 @@ public class exDebugHelper : MonoBehaviour {
 
     public static void ScreenPrint ( Vector2 _pos, string _text ) {
         if ( instance.showScreenDebugText ) {
+#if EX2D
             exSpriteFont debugText = instance.debugTextPool.Request<exSpriteFont>();
 
             Vector2 screenPos = debugText.renderCamera.WorldToScreenPoint(_pos);
@@ -55,6 +61,10 @@ public class exDebugHelper : MonoBehaviour {
 
             debugText.text = _text;
             debugText.enabled = true;
+#else
+            TextInfo info = new TextInfo( _pos, _text ); 
+            instance.debugTextPool.Add(info);
+#endif
         }
     }
 
@@ -74,10 +84,27 @@ public class exDebugHelper : MonoBehaviour {
     // serialized
     ///////////////////////////////////////////////////////////////////////////////
 
+#if EX2D
     public exSpriteFont txtPrint;
     public exSpriteFont txtFPS;
     public exSpriteFont txtLog;
     public exGameObjectPool debugTextPool = new exGameObjectPool();
+#else 
+    protected string txtPrint = "screen print: ";
+    protected string txtFPS = "fps: ";
+    protected string txtLog = "log: ";
+
+    public class TextInfo {
+        public Vector2 screenPos = Vector2.zero;
+        public string text;
+
+        public TextInfo ( Vector2 _screenPos, string _text ) {
+            screenPos = _screenPos;
+            text = _text;
+        }
+    }
+    protected List<TextInfo> debugTextPool = new List<TextInfo>();
+#endif
 
     [SerializeField] protected bool showFps_ = true;
     public bool showFps {
@@ -85,8 +112,10 @@ public class exDebugHelper : MonoBehaviour {
         set {
             if ( showFps_ != value ) {
                 showFps_ = value;
+#if EX2D
                 if ( txtFPS != null )
                     txtFPS.enabled = showFps_;
+#endif
             }
         }
     }
@@ -97,8 +126,10 @@ public class exDebugHelper : MonoBehaviour {
         set {
             if ( showScreenPrint_ != value ) {
                 showScreenPrint_ = value;
+#if EX2D
                 if ( txtPrint != null )
                     txtPrint.enabled = showScreenPrint_;
+#endif
             }
         }
     }
@@ -109,8 +140,10 @@ public class exDebugHelper : MonoBehaviour {
         set {
             if ( showScreenLog_ != value ) {
                 showScreenLog_ = value;
+#if EX2D
                 if ( txtLog != null ) 
                     txtLog.enabled = showScreenLog_;
+#endif
             }
         }
     }
@@ -140,6 +173,7 @@ public class exDebugHelper : MonoBehaviour {
         if ( instance == null )
             instance = this;
 
+#if EX2D
         txtPrint.text = "";
         txtFPS.text = "";
         txtLog.text = "";
@@ -153,6 +187,15 @@ public class exDebugHelper : MonoBehaviour {
                 textGO.GetComponent<exSpriteFont>().enabled = false;
             }
         }
+#else
+        txtPrint = "";
+        txtFPS = "";
+        txtLog = "";
+
+        if ( showScreenDebugText ) {
+            debugTextPool.Clear();
+        }
+#endif
     }
 
     // ------------------------------------------------------------------ 
@@ -182,12 +225,56 @@ public class exDebugHelper : MonoBehaviour {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+#if !EX2D
+    void OnGUI () {
+        GUIContent content = null;
+        Vector2 size = Vector2.zero;
+        float curX = 10.0f;
+        float curY = 10.0f;
+
+        if ( showFps ) {
+            content = new GUIContent(txtFPS);
+            size = GUI.skin.label.CalcSize(content);
+            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS );
+            curY += size.y;
+        }
+        if ( showScreenPrint ) {
+            content = new GUIContent(txtPrint);
+            size = GUI.skin.label.CalcSize(content);
+            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtPrint );
+        }
+        if ( showScreenLog ) {
+            content = new GUIContent(txtLog);
+            size = GUI.skin.label.CalcSize(content);
+            GUI.Label ( new Rect( Screen.width - 10.0f - size.x, Screen.height - 10.0f - size.y, size.x, size.y ), txtLog );
+        }
+        if ( showScreenDebugText ) {
+            for ( int i = 0; i < debugTextPool.Count; ++i ) {
+                TextInfo info = debugTextPool[i];
+                content = new GUIContent(info.text);
+                size = GUI.skin.label.CalcSize(content);
+
+                Vector2 pos = new Vector2( info.screenPos.x, Screen.height - info.screenPos.y ) - size * 0.5f; 
+                GUI.Label ( new Rect( pos.x, pos.y, size.x, size.y ), info.text );
+            }
+        }
+    }
+#endif
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
     void UpdateFPS () {
         float timeNow = Time.realtimeSinceStartup;
         fps = frames / (timeNow - lastInterval);
         frames = 0;
         lastInterval = timeNow;
+#if EX2D
         txtFPS.text = "fps: " + fps.ToString("f2");
+#else
+        txtFPS = "fps: " + fps.ToString("f2");
+#endif
     }
 
     // ------------------------------------------------------------------ 
@@ -196,6 +283,7 @@ public class exDebugHelper : MonoBehaviour {
 
     IEnumerator CleanDebugText () {
         yield return new WaitForEndOfFrame();
+#if EX2D
         txtPrint.text = "";
 
         if ( showScreenDebugText ) {
@@ -205,6 +293,13 @@ public class exDebugHelper : MonoBehaviour {
                 textGO.GetComponent<exSpriteFont>().enabled = false;
             }
         }
+#else
+        txtPrint = "";
+
+        if ( showScreenDebugText ) {
+            debugTextPool.Clear();
+        }
+#endif
     }
 
     // ------------------------------------------------------------------ 
@@ -217,7 +312,11 @@ public class exDebugHelper : MonoBehaviour {
             foreach ( string l in logs ) {
                 text = text + l + "\n";
             }
+#if EX2D 
             txtLog.text = text;
+#else
+            txtLog = text;
+#endif
             updateLogText = false;
         }
     }

@@ -26,7 +26,12 @@ public class exDebugHelperEditor : Editor {
     ///////////////////////////////////////////////////////////////////////////////
 
     exDebugHelper curEdit;
-    SerializedProperty propDebugTextPool;
+#if EX2D
+    SerializedProperty debugTextPoolProp;
+    SerializedProperty txtPrintProp;
+    SerializedProperty txtFPSProp;
+    SerializedProperty txtLogProp;
+#endif
 
     ///////////////////////////////////////////////////////////////////////////////
     // functions
@@ -40,7 +45,12 @@ public class exDebugHelperEditor : Editor {
         if ( target != curEdit ) {
             curEdit = target as exDebugHelper;
         }
-        propDebugTextPool = serializedObject.FindProperty ("debugTextPool");
+#if EX2D
+        debugTextPoolProp = serializedObject.FindProperty ("debugTextPool");
+        txtPrintProp = serializedObject.FindProperty ("txtPrint");
+        txtFPSProp = serializedObject.FindProperty ("txtFPS");
+        txtLogProp = serializedObject.FindProperty ("txtLog");
+#endif
     }
 
     // ------------------------------------------------------------------ 
@@ -58,49 +68,24 @@ public class exDebugHelperEditor : Editor {
         // ======================================================== 
 
         serializedObject.Update();
-        if ( EditorGUILayout.PropertyField ( propDebugTextPool, new GUIContent("Debug Text Pool") ) ) 
-        {
-            EditorGUI.indentLevel = 1;
-            curEdit.debugTextPool.prefab = EditorGUILayout.ObjectField( "Prefab"
-                                                                        , curEdit.debugTextPool.prefab
-                                                                        , typeof(GameObject)
-                                                                        , true 
-                                                                      ) as GameObject;
-            curEdit.debugTextPool.size = EditorGUILayout.IntField( "Size", curEdit.debugTextPool.size );
-            EditorGUI.indentLevel = 0;
-        }
+#if EX2D
+            if ( EditorGUILayout.PropertyField ( debugTextPoolProp, new GUIContent("Debug Text Pool") ) ) 
+            {
+                EditorGUI.indentLevel = 1;
+                curEdit.debugTextPool.prefab = EditorGUILayout.ObjectField( "Prefab"
+                                                                            , curEdit.debugTextPool.prefab
+                                                                            , typeof(GameObject)
+                                                                            , true 
+                                                                          ) as GameObject;
+                curEdit.debugTextPool.size = EditorGUILayout.IntField( "Size", curEdit.debugTextPool.size );
+                EditorGUI.indentLevel = 0;
+            }
+
+            EditorGUILayout.PropertyField (txtPrintProp);
+            EditorGUILayout.PropertyField (txtFPSProp);
+            EditorGUILayout.PropertyField (txtLogProp);
+#endif
         serializedObject.ApplyModifiedProperties();
-
-        // ======================================================== 
-        // text print
-        // ======================================================== 
-
-        curEdit.txtPrint = (exSpriteFont)EditorGUILayout.ObjectField( "Text Print"
-                                                                      , curEdit.txtPrint
-                                                                      , typeof(exSpriteFont)
-                                                                      , false 
-                                                                    );
-
-        // ======================================================== 
-        // text FPS 
-        // ======================================================== 
-
-        curEdit.txtFPS = (exSpriteFont)EditorGUILayout.ObjectField( "Text FPS"
-                                                                    , curEdit.txtFPS
-                                                                    , typeof(exSpriteFont)
-                                                                    , false 
-                                                                  );
-
-        // ======================================================== 
-        // text Log 
-        // ======================================================== 
-
-        curEdit.txtLog = (exSpriteFont)EditorGUILayout.ObjectField( "Text Log"
-                                                                    , curEdit.txtLog
-                                                                    , typeof(exSpriteFont)
-                                                                    , false 
-                                                                  );
-
 
         curEdit.showFps = EditorGUILayout.Toggle( "Show Fps", curEdit.showFps );
         curEdit.showScreenPrint = EditorGUILayout.Toggle( "Show Screen Print", curEdit.showScreenPrint );
