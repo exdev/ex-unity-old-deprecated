@@ -13,11 +13,75 @@ using UnityEngine;
 using System.Collections;
 
 ///////////////////////////////////////////////////////////////////////////////
-// defines
+// exPool
 ///////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
-public class exPool<T> where T : MonoBehaviour {
+public class exPool<T> where T : class, new() {
+ 
+    [System.NonSerialized] public int size = 0;
+    [System.NonSerialized] public int idx = 0;
+    [System.NonSerialized] public T[] data;
+    [System.NonSerialized] public T[] initData;
+ 
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+ 
+    public void Init ( int _size ) {
+        size = _size;
+        initData = new T[size]; 
+        data = new T[size];
+        for ( int i = 0; i < size; ++i ) {
+            T obj = new T();
+            initData[i] = obj;
+            data[i] = initData[i];
+        }
+        idx = size - 1;
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    public void Reset () {
+        for ( int i = 0; i < size; ++i ) {
+            data[i] = initData[i];
+        }
+        idx = size - 1;
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    public T Request ()  {
+        if ( idx < 0 ) {
+            Debug.LogError ("Error: the pool do not have enough free item.");
+            return null;
+        }
+ 
+        T result = data[idx];
+        --idx; 
+        return result;
+    }
+ 
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+ 
+    public void Return ( T _item ) {
+        ++idx;
+        data[idx] = _item;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// exComponentPool
+///////////////////////////////////////////////////////////////////////////////
+
+[System.Serializable]
+public class exComponentPool<T> where T : Component {
  
     [System.NonSerialized] public GameObject prefab;
     [System.NonSerialized] public int size = 0;
@@ -37,7 +101,6 @@ public class exPool<T> where T : MonoBehaviour {
         if ( prefab != null ) {
             for ( int i = 0; i < size; ++i ) {
                 GameObject obj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity) as GameObject;
-                // obj.SetActiveRecursively(false);
                 initData[i] = obj.GetComponent<T>();
                 data[i] = initData[i];
             }
@@ -103,7 +166,7 @@ public class exPool<T> where T : MonoBehaviour {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//
+// exGameObjectPool
 ///////////////////////////////////////////////////////////////////////////////
 
 [System.Serializable]
@@ -135,7 +198,6 @@ public class exGameObjectPool {
         if ( prefab != null ) {
             for ( int i = 0; i < size; ++i ) {
                 GameObject obj = GameObject.Instantiate(prefab, Vector3.zero, Quaternion.identity) as GameObject;
-                // obj.SetActiveRecursively(false);
                 initData[i] = obj;
                 data[i] = initData[i];
             }
