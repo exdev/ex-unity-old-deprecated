@@ -33,7 +33,7 @@ public class exDebugHelper : MonoBehaviour {
     ///////////////////////////////////////////////////////////////////////////////
 
     // static instance
-    private static exDebugHelper instance = null;
+    protected static exDebugHelper instance = null;
 
     // ------------------------------------------------------------------ 
     // Desc: 
@@ -75,13 +75,31 @@ public class exDebugHelper : MonoBehaviour {
     // ------------------------------------------------------------------ 
     // Desc: 
     // ------------------------------------------------------------------ 
+    public enum LogType {
+        None,
+        Normal,
+        Warning,
+        Error,
+    }
 
-    public static void ScreenLog ( string _text ) {
+    public static void ScreenLog ( string _text, LogType _logType = LogType.None, GUIStyle _style = null ) {
+#if EX2D
         instance.logs.Add(_text);
         if ( instance.logs.Count > instance.logCount ) {
             instance.logs.RemoveAt(0);
         }
         instance.updateLogText = true;
+#else
+        LogInfo info = new LogInfo( _text, _style, 5.0f );
+        instance.pendingLogs.Enqueue(info);
+#endif
+        if ( _logType != LogType.None ) {
+            switch ( _logType ) {
+            case LogType.Normal: Debug.Log(_text); break;
+            case LogType.Warning: Debug.LogWarning(_text); break;
+            case LogType.Error: Debug.LogError(_text); break;
+            }
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -93,6 +111,9 @@ public class exDebugHelper : MonoBehaviour {
     public exSpriteFont txtFPS;
     public exSpriteFont txtLog;
     public exGameObjectPool debugTextPool = new exGameObjectPool();
+
+    protected List<string> logs = new List<string>();
+    protected bool updateLogText = false; 
 #else 
     public GUIStyle printStyle = null;
     public GUIStyle fpsStyle = null;
@@ -100,22 +121,61 @@ public class exDebugHelper : MonoBehaviour {
 
     protected string txtPrint = "screen print: ";
     protected string txtFPS = "fps: ";
-    protected string txtLog = "log: ";
 
+    // for screen debug text
     public class TextInfo {
         public Vector2 screenPos = Vector2.zero;
         public string text;
-        public GUIStyle style = GUI.skin.label; 
+        public GUIStyle style = null;
 
         public TextInfo ( Vector2 _screenPos, string _text, GUIStyle _style ) {
             screenPos = _screenPos;
             text = _text;
-            style = (_style == null) ? GUI.skin.label : _style;  
+            style = _style;  
         }
     }
     protected List<TextInfo> debugTextPool = new List<TextInfo>();
+
+    // for screen log
+    public class LogInfo {
+        public string text;
+        public GUIStyle style = null;
+
+        public float ratio { get { return (timer >= lifetime - instance.logFadeOutDuration) ? (timer - (lifetime-instance.logFadeOutDuration))/instance.logFadeOutDuration : 0.0f; } }
+        public bool canDelete { get { return timer >= lifetime; } }
+
+        // internal
+        float speed = 1.0f;
+        float timer = 0.0f;
+        float lifetime = 5.0f;
+
+        public LogInfo ( string _text, GUIStyle _style, float _lifetime ) {
+            text = _text;
+            style = _style;  
+            lifetime = _lifetime;
+        }
+
+        public void Dead () {
+            float deadTime = lifetime - instance.logFadeOutDuration;
+            if ( timer < deadTime - 1.0f) {
+                timer = deadTime - 1.0f;
+            }
+        }
+
+        public void Tick () {
+            timer += Time.deltaTime * speed;
+        }
+    }
+    // DISABLE { 
+    // float logInterval = 0.05f;
+    // float logTimer = 0.0f;
+    // } DISABLE end 
+    float logFadeOutDuration = 0.3f;
+    protected List<LogInfo> logs = new List<LogInfo>();
+    protected Queue<LogInfo> pendingLogs = new Queue<LogInfo>();
 #endif
 
+    // fps
     [SerializeField] protected bool showFps_ = true;
     public bool showFps {
         get { return showFps_; }
@@ -130,6 +190,7 @@ public class exDebugHelper : MonoBehaviour {
         }
     }
 
+    // screen print
     [SerializeField] protected bool showScreenPrint_ = true;
     public bool showScreenPrint {
         get { return showScreenPrint_; }
@@ -144,6 +205,7 @@ public class exDebugHelper : MonoBehaviour {
         }
     }
 
+    // screen log
     [SerializeField] protected bool showScreenLog_ = true;
     public bool showScreenLog {
         get { return showScreenLog_; }
@@ -157,19 +219,18 @@ public class exDebugHelper : MonoBehaviour {
             }
         }
     }
-
-    public bool showScreenDebugText = false;
     public int logCount = 10;
+
+    // screen debug text
+    public bool showScreenDebugText = false;
 
     ///////////////////////////////////////////////////////////////////////////////
     // non-serialized
     ///////////////////////////////////////////////////////////////////////////////
 
-    [System.NonSerialized] public List<string> logs = new List<string>();
-    [System.NonSerialized] public bool updateLogText = false; 
-    private int frames = 0;
-    private float fps = 0.0f;
-    private float lastInterval = 0.0f;
+    protected int frames = 0;
+    protected float fps = 0.0f;
+    protected float lastInterval = 0.0f;
 
     ///////////////////////////////////////////////////////////////////////////////
     // functions
@@ -198,9 +259,11 @@ public class exDebugHelper : MonoBehaviour {
             }
         }
 #else
+        // DISABLE { 
+        // logTimer = logInterval;
+        // } DISABLE end 
         txtPrint = "";
         txtFPS = "";
-        txtLog = "";
 
         if ( showScreenDebugText ) {
             debugTextPool.Clear();
@@ -248,24 +311,43 @@ public class exDebugHelper : MonoBehaviour {
             GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS, fpsStyle );
             curY += size.y;
         }
+
         if ( showScreenPrint ) {
             content = new GUIContent(txtPrint);
             size = printStyle.CalcSize(content);
             GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtPrint, printStyle );
         }
+
         if ( showScreenLog ) {
-            content = new GUIContent(txtLog);
-            size = logStyle.CalcSize(content);
-            GUI.Label ( new Rect( Screen.width - 10.0f - size.x, Screen.height - 10.0f - size.y, size.x, size.y ), txtLog, logStyle );
+            float y = Screen.height - 10.0f;
+
+            for ( int i = logs.Count-1; i >= 0; --i ) {
+                LogInfo info = logs[i];
+
+                content = new GUIContent(info.text);
+                GUIStyle style = (info.style == null) ? logStyle : info.style;
+                size = style.CalcSize(content);
+
+                //
+                style.normal.textColor = new Color ( style.normal.textColor.r, 
+                                                     style.normal.textColor.g, 
+                                                     style.normal.textColor.b, 
+                                                     1.0f - info.ratio );
+
+                y -= size.y;
+                GUI.Label ( new Rect( Screen.width - 10.0f - size.x, y, size.x, size.y ), info.text, style );
+            }
         }
+
         if ( showScreenDebugText ) {
             for ( int i = 0; i < debugTextPool.Count; ++i ) {
                 TextInfo info = debugTextPool[i];
                 content = new GUIContent(info.text);
-                size = info.style.CalcSize(content);
+                GUIStyle style = (info.style == null) ? GUI.skin.label : info.style;
+                size = style.CalcSize(content);
 
                 Vector2 pos = new Vector2( info.screenPos.x, Screen.height - info.screenPos.y ) - size * 0.5f; 
-                GUI.Label ( new Rect( pos.x, pos.y, size.x, size.y ), info.text, info.style );
+                GUI.Label ( new Rect( pos.x, pos.y, size.x, size.y ), info.text, style );
             }
         }
     }
@@ -317,17 +399,56 @@ public class exDebugHelper : MonoBehaviour {
     // ------------------------------------------------------------------ 
 
     void UpdateLog () {
+#if EX2D 
         if ( updateLogText ) {
             string text = "";
-            foreach ( string l in logs ) {
-                text = text + l + "\n";
+            for ( int i = 0; i < logs.Count; ++i ) {
+                text = text + logs[i] + "\n";
             }
-#if EX2D 
             txtLog.text = text;
-#else
-            txtLog = text;
-#endif
             updateLogText = false;
         }
+#else
+        for ( int i = logs.Count-1; i >= 0; --i ) {
+            LogInfo info = logs[i];
+            info.Tick();
+            if ( info.canDelete ) {
+                logs.RemoveAt(i);
+            }
+        }
+
+        // DISABLE { 
+        // if ( logTimer < logInterval ) {
+        //     logTimer += Time.deltaTime;
+        // }
+        // else {
+        //     if ( pendingLogs.Count > 0 ) {
+        //         logTimer = 0.0f;
+        //         logs.Add(pendingLogs.Dequeue());
+
+        //         if ( instance.logs.Count > instance.logCount ) {
+        //             for ( int i = 0; i < instance.logs.Count - instance.logCount; ++i ) {
+        //                 instance.logs[i].Dead();
+        //             }
+        //         }
+        //     }
+        // }
+        // } DISABLE end 
+
+        if ( pendingLogs.Count > 0 ) {
+            int count = Mathf.CeilToInt(pendingLogs.Count/2);
+
+            do {
+                logs.Add(pendingLogs.Dequeue());
+                --count;
+
+                if ( instance.logs.Count > instance.logCount ) {
+                    for ( int i = 0; i < instance.logs.Count - instance.logCount; ++i ) {
+                        instance.logs[i].Dead();
+                    }
+                }
+            } while ( count > 0 );
+        }
+#endif
     }
 }
