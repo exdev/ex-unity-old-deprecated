@@ -110,6 +110,7 @@ public class exDebugHelper : MonoBehaviour {
     public exSpriteFont txtPrint;
     public exSpriteFont txtFPS;
     public exSpriteFont txtLog;
+    public exSpriteFont txtTimeScale;
     public exGameObjectPool debugTextPool = new exGameObjectPool();
 
     protected List<string> logs = new List<string>();
@@ -118,6 +119,7 @@ public class exDebugHelper : MonoBehaviour {
     public GUIStyle printStyle = null;
     public GUIStyle fpsStyle = null;
     public GUIStyle logStyle = null;
+    public GUIStyle timeScaleStyle = null;
 
     protected string txtPrint = "screen print: ";
     protected string txtFPS = "fps: ";
@@ -185,6 +187,21 @@ public class exDebugHelper : MonoBehaviour {
 #if EX2D
                 if ( txtFPS != null )
                     txtFPS.enabled = showFps_;
+#endif
+            }
+        }
+    }
+
+    // timescale
+    [SerializeField] protected bool enableTimeScaleDebug_ = true;
+    public bool enableTimeScaleDebug {
+        get { return enableTimeScaleDebug_; }
+        set {
+            if ( enableTimeScaleDebug_ != value ) {
+                enableTimeScaleDebug_ = value;
+#if EX2D
+                if ( txtTimeScale != null )
+                    txtTimeScale.enabled = enableTimeScaleDebug_;
 #endif
             }
         }
@@ -287,6 +304,9 @@ public class exDebugHelper : MonoBehaviour {
         // count fps
         ++frames;
 
+        //
+        UpdateTimeScale ();
+
         // update log
         UpdateLog ();
 
@@ -309,6 +329,14 @@ public class exDebugHelper : MonoBehaviour {
             content = new GUIContent(txtFPS);
             size = fpsStyle.CalcSize(content);
             GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS, fpsStyle );
+            curY += size.y;
+        }
+
+        if ( enableTimeScaleDebug ) {
+            string txtTimeScale = "TimeScale = " + Time.timeScale.ToString("f2");
+            content = new GUIContent(txtTimeScale);
+            size = timeScaleStyle.CalcSize(content);
+            GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtTimeScale, timeScaleStyle );
             curY += size.y;
         }
 
@@ -367,6 +395,28 @@ public class exDebugHelper : MonoBehaviour {
 #else
         txtFPS = "fps: " + fps.ToString("f2");
 #endif
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    void UpdateTimeScale () {
+        if ( enableTimeScaleDebug ) {
+            if ( Input.GetKey(KeyCode.Minus) ) {
+                Time.timeScale = Mathf.Max( Time.timeScale - 0.01f, 0.0f );
+            }
+            else if ( Input.GetKey(KeyCode.Equals) ) {
+                Time.timeScale = Mathf.Min( Time.timeScale + 0.01f, 10.0f );
+            }
+
+            if ( Input.GetKey(KeyCode.Alpha0 ) ) {
+                Time.timeScale = 0.0f;
+            }
+            else if ( Input.GetKey(KeyCode.Alpha9 ) ) {
+                Time.timeScale = 1.0f;
+            }
+        }
     }
 
     // ------------------------------------------------------------------ 

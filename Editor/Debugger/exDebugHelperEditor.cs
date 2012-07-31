@@ -33,10 +33,12 @@ public class exDebugHelperEditor : Editor {
     SerializedProperty txtPrintProp;
     SerializedProperty txtFPSProp;
     SerializedProperty txtLogProp;
+    SerializedProperty txtTimeScaleProp;
 #else
     SerializedProperty printStyleProp;
     SerializedProperty fpsStyleProp;
     SerializedProperty logStyleProp;
+    SerializedProperty timeScaleStyleProp;
 #endif
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -56,10 +58,12 @@ public class exDebugHelperEditor : Editor {
         txtPrintProp = serializedObject.FindProperty ("txtPrint");
         txtFPSProp = serializedObject.FindProperty ("txtFPS");
         txtLogProp = serializedObject.FindProperty ("txtLog");
+        txtTimeScaleProp = serializedObject.FindProperty ("txtTimeScale");
 #else
         printStyleProp = serializedObject.FindProperty ("printStyle");
         fpsStyleProp = serializedObject.FindProperty ("fpsStyle");
         logStyleProp = serializedObject.FindProperty ("logStyle");
+        timeScaleStyleProp = serializedObject.FindProperty ("timeScaleStyle");
 #endif
     }
 
@@ -94,10 +98,12 @@ public class exDebugHelperEditor : Editor {
             EditorGUILayout.PropertyField (txtPrintProp);
             EditorGUILayout.PropertyField (txtFPSProp);
             EditorGUILayout.PropertyField (txtLogProp);
+            EditorGUILayout.PropertyField (txtTimeScaleProp);
 #else
             EditorGUILayout.PropertyField (printStyleProp, true);
             EditorGUILayout.PropertyField (fpsStyleProp, true);
             EditorGUILayout.PropertyField (logStyleProp, true);
+            EditorGUILayout.PropertyField (timeScaleStyleProp, true);
 #endif
         serializedObject.ApplyModifiedProperties();
 
@@ -105,6 +111,7 @@ public class exDebugHelperEditor : Editor {
         curEdit.showScreenPrint = EditorGUILayout.Toggle( "Show Screen Print", curEdit.showScreenPrint );
         curEdit.showScreenLog = EditorGUILayout.Toggle( "Show Screen Log", curEdit.showScreenLog );
         curEdit.showScreenDebugText = EditorGUILayout.Toggle( "Show Screen Debug Text", curEdit.showScreenDebugText );
+        curEdit.enableTimeScaleDebug = EditorGUILayout.Toggle( "Enable Time Scale Debug", curEdit.enableTimeScaleDebug );
 
         // ======================================================== 
         // check dirty 

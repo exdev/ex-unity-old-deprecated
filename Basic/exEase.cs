@@ -73,7 +73,8 @@ public class exEase {
         BounceInOut,
         BounceOutIn,
         Smooth,
-        Fade
+        Fade,
+		Spring,
     }
 	public delegate float easeCallback ( float _v );
 
@@ -135,6 +136,7 @@ public class exEase {
             typeToCallback[exEase.Type.BounceOutIn] = exEase.BounceOutIn_Simple;
             typeToCallback[exEase.Type.Smooth] = exEase.Smooth;
             typeToCallback[exEase.Type.Fade] = exEase.Fade;
+			typeToCallback[exEase.Type.Spring] = exEase.Spring;
         }
     }
 
@@ -484,6 +486,33 @@ public class exEase {
     }
 
     // ------------------------------------------------------------------ 
+    // Desc: Spring
+    // ------------------------------------------------------------------ 
+
+	public static float Spring ( float _t ) {
+		_t = Mathf.Clamp01(_t);
+		_t = (Mathf.Sin(_t * Mathf.PI * (0.2f + 2.5f * _t * _t * _t)) * Mathf.Pow(1f - _t, 2.2f) + _t) * (1f + (1.2f * (1f - _t)));
+		return _t;
+	}
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    public static float Punch ( float _amplitude, float _t ) {
+        float s = 9;
+        if (_t == 0) {
+            return 0;
+        }
+        if (_t == 1) {
+            return 0;
+        }
+        float period = 1 * 0.3f;
+        s = period / (2 * Mathf.PI) * Mathf.Asin(0);
+        return (_amplitude * Mathf.Pow(2, -10 * _t) * Mathf.Sin((_t * 1 - s) * (2 * Mathf.PI) / period));
+    }
+
+    // ------------------------------------------------------------------ 
     // Desc: 
     // ------------------------------------------------------------------ 
 
@@ -499,4 +528,12 @@ public class exEase {
     public static Color Lerp ( Color _src, Color _dest, float _v ) {
         return _src * ( 1.0f - _v ) + _dest * _v;
     }
+	public static Rect Lerp ( Rect _src, Rect _dest, float _v ) {
+		Rect rect = new Rect();
+		rect.x = _src.x * (1.0f - _v) + _dest.x * _v;
+		rect.y = _src.y * (1.0f - _v) + _dest.y * _v;
+		rect.width = _src.width * (1.0f - _v) + _dest.width * _v;
+		rect.height = _src.height * (1.0f - _v) + _dest.height * _v;
+		return rect;
+	}
 }
