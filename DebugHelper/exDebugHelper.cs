@@ -416,6 +416,9 @@ public class exDebugHelper : MonoBehaviour {
             else if ( Input.GetKey(KeyCode.Alpha9 ) ) {
                 Time.timeScale = 1.0f;
             }
+#if EX2D
+            txtTimeScale.text = "TimeScale = " + Time.timeScale.ToString("f2");
+#endif
         }
     }
 
