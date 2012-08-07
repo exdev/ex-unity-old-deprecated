@@ -49,7 +49,7 @@ public class exAssetBundleConfigEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-	public override void OnInspectorGUI () {
+    public override void OnInspectorGUI () {
         serializedObject.Update ();
 
             EditorGUILayout.PropertyField (autoVersionProp);

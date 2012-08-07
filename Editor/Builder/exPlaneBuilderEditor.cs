@@ -177,7 +177,7 @@ public class exPlaneBuilderEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-	public override void OnInspectorGUI () {
+    public override void OnInspectorGUI () {
         exPlaneBuilder editTarget = target as exPlaneBuilder;
         EditorGUILayout.Space ();
 
@@ -289,7 +289,7 @@ public class exPlaneBuilderEditor : Editor {
         if ( isDirty ) {
             Build();
         }
-	}
+    }
 
     // ------------------------------------------------------------------ 
     // Desc: 

@@ -211,7 +211,7 @@ public class exCubeEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-	public override void OnInspectorGUI () {
+    public override void OnInspectorGUI () {
         exCubeBuilder editTarget = target as exCubeBuilder;
         EditorGUILayout.Space ();
 
@@ -263,7 +263,7 @@ public class exCubeEditor : Editor {
         if ( isDirty ) {
             Build();
         }
-	}
+    }
 
     // ------------------------------------------------------------------ 
     // Desc: 

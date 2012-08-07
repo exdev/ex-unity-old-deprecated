@@ -35,15 +35,15 @@ public class exPlaneBuilder : MonoBehaviour {
     // ------------------------------------------------------------------ 
 
     public enum Anchor {
-		TopLeft,
-		TopCenter,
-		TopRight,
-		MidLeft,
-		MidCenter,
-		MidRight,
-		BotLeft,
-		BotCenter,
-		BotRight,
+        TopLeft,
+        TopCenter,
+        TopRight,
+        MidLeft,
+        MidCenter,
+        MidRight,
+        BotLeft,
+        BotCenter,
+        BotRight,
     }
 
     ///////////////////////////////////////////////////////////////////////////////
