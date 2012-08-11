@@ -5,7 +5,7 @@
 // Description  : 
 // ======================================================================================
 
-#define EX2D
+// #define EX2D
 
 ///////////////////////////////////////////////////////////////////////////////
 // usings
@@ -71,7 +71,7 @@ public class exDebugHelperEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-	override public void OnInspectorGUI () {
+    override public void OnInspectorGUI () {
 
         EditorGUIUtility.LookLikeInspector ();
         EditorGUILayout.Space ();
@@ -120,6 +120,6 @@ public class exDebugHelperEditor : Editor {
         if ( GUI.changed ) {
             EditorUtility.SetDirty(curEdit);
         }
-	}
+    }
 }
 

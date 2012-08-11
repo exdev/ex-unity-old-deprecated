@@ -53,7 +53,7 @@ public class exTimebasedCurveEditor : Editor {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-	public override void OnInspectorGUI () {
+    public override void OnInspectorGUI () {
         serializedObject.Update ();
 
             EditorGUILayout.PropertyField (wrapModeProp);
