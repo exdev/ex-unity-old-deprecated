@@ -38,20 +38,20 @@ public class exTimebasedCurveInfo : ScriptableObject {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-    public float WrapSeconds ( float _seconds, WrapMode _wrapMode ) {
+    public float WrapSeconds ( float _seconds, float _length, WrapMode _wrapMode ) {
         float t = Mathf.Abs(_seconds);
         if ( _wrapMode == WrapMode.Loop ) {
-            t %= length;
+            t %= _length;
         }
         else if ( _wrapMode == WrapMode.PingPong ) {
-            int cnt = (int)(t/length);
-            t %= length;
+            int cnt = (int)(t/_length);
+            t %= _length;
             if ( cnt % 2 == 1 ) {
-                t = length - t;
+                t = _length - t;
             }
         }
         else {
-            t = Mathf.Clamp( t, 0.0f, length );
+            t = Mathf.Clamp( t, 0.0f, _length );
         }
         return t;
     }
@@ -151,7 +151,7 @@ public class exTimebasedCurve {
         time += deltaTime * speed;
 
         //
-        float wrappedTime = data.WrapSeconds(time, data.wrapMode);
+        float wrappedTime = data.WrapSeconds(time, duration, data.wrapMode);
 
         // check if stop
         if ( data.wrapMode == exTimebasedCurveInfo.WrapMode.Once ) {
