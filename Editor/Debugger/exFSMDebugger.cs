@@ -30,8 +30,11 @@ class exFSMDebugger : EditorWindow {
     public bool lockSelection = false;
 
     private fsm.Machine curEdit = null;
+    private int index = 0;
     private GameObject curGO = null;
     private GUIStyle textStyle = new GUIStyle();
+    private FSMBase[] fsmList = null;
+    private List<string> options = new List<string>();
 
     ///////////////////////////////////////////////////////////////////////////////
     // functions
@@ -42,10 +45,16 @@ class exFSMDebugger : EditorWindow {
     // NOTE: you should inherit the exFSMDebugger and override this
     // ------------------------------------------------------------------ 
 
-    protected virtual fsm.Machine GetStateMachine ( GameObject _go ) {
-        FSMBase fsm = _go.GetComponent<FSMBase>();
-        if ( fsm != null )
-            return fsm.stateMachine;
+    protected virtual fsm.Machine GetStateMachine ( GameObject _go, int _idx ) {
+        index = 0;
+        options.Clear();
+        fsmList = _go.GetComponents<FSMBase>();
+        if ( _idx < fsmList.Length ) {
+            index = _idx;
+            for ( int i = 0; i < fsmList.Length; ++i ) 
+                options.Add( fsmList[i].GetType().ToString() );
+            return fsmList[index].stateMachine;
+        }
         return null;
     }
 
@@ -83,14 +92,14 @@ class exFSMDebugger : EditorWindow {
     // Desc: 
     // ------------------------------------------------------------------ 
 
-    public void Debug ( Object _obj ) {
+    public void Debug ( Object _obj, int _idx = 0 ) {
         GameObject go = _obj as GameObject;
         if ( go == null ) {
             return;
         }
 
         //
-        fsm.Machine machine = GetStateMachine (go);
+        fsm.Machine machine = GetStateMachine (go, _idx);
 
         // check if repaint
         if ( curEdit != machine ) {
@@ -111,7 +120,7 @@ class exFSMDebugger : EditorWindow {
         if ( curEdit == null || lockSelection == false ) {
             GameObject go = Selection.activeGameObject;
             if ( go ) {
-                Debug (go);
+                Debug (go, 0);
             }
         }
         Repaint ();
@@ -147,6 +156,12 @@ class exFSMDebugger : EditorWindow {
             // ======================================================== 
 
             GUILayout.FlexibleSpace();
+
+            // ======================================================== 
+            // drop 
+            // ======================================================== 
+
+            index = EditorGUILayout.Popup( index, options.ToArray(), EditorStyles.toolbarDropDown );
 
             // ======================================================== 
             // lock button
