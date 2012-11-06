@@ -408,9 +408,12 @@ public class exDebugHelper : MonoBehaviour {
         txtFPS.renderCamera = _camera;
         txtLog.renderCamera = _camera;
         txtTimeScale.renderCamera = _camera;
-        for ( int i = 0; i < debugTextPool.initData.Length; ++i ) {
-            GameObject textGO = debugTextPool.initData[i];
-            textGO.GetComponent<exSpriteFont>().renderCamera = _camera;
+
+        if ( debugTextPool.prefab != null ) {
+            for ( int i = 0; i < debugTextPool.initData.Length; ++i ) {
+                GameObject textGO = debugTextPool.initData[i];
+                textGO.GetComponent<exSpriteFont>().renderCamera = _camera;
+            }
         }
 #endif
     }
