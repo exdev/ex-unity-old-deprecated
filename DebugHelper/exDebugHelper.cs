@@ -401,6 +401,24 @@ public class exDebugHelper : MonoBehaviour {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+    public void ResetCamera ( Camera _camera ) {
+#if EX2D
+        txtFPS.renderCamera = _camera;
+        txtPrint.renderCamera = _camera;
+        txtFPS.renderCamera = _camera;
+        txtLog.renderCamera = _camera;
+        txtTimeScale.renderCamera = _camera;
+        for ( int i = 0; i < debugTextPool.initData.Length; ++i ) {
+            GameObject textGO = debugTextPool.initData[i];
+            textGO.GetComponent<exSpriteFont>().renderCamera = _camera;
+        }
+#endif
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
     void UpdateTimeScale () {
         if ( enableTimeScaleDebug ) {
             if ( Input.GetKey(KeyCode.Minus) ) {
