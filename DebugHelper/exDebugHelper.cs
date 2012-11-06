@@ -263,8 +263,16 @@ public class exDebugHelper : MonoBehaviour {
 
 #if EX2D
         txtPrint.text = "";
+        txtPrint.enabled = showScreenPrint_;
+
         txtFPS.text = "";
+        txtFPS.enabled = showFps_;
+
         txtLog.text = "";
+        txtLog.enabled = showScreenLog_;
+
+        txtTimeScale.text = "";
+        txtTimeScale.enabled = enableTimeScaleDebug;
 
         if ( showScreenDebugText ) {
             debugTextPool.Init();
@@ -404,10 +412,16 @@ public class exDebugHelper : MonoBehaviour {
     public void ResetCamera ( Camera _camera ) {
 #if EX2D
         txtFPS.renderCamera = _camera;
+        txtFPS.enabled = showFps_;
+
         txtPrint.renderCamera = _camera;
-        txtFPS.renderCamera = _camera;
+        txtPrint.enabled = showScreenPrint_;
+
         txtLog.renderCamera = _camera;
+        txtLog.enabled = showScreenLog_;
+
         txtTimeScale.renderCamera = _camera;
+        txtTimeScale.enabled = enableTimeScaleDebug;
 
         if ( debugTextPool.prefab != null ) {
             for ( int i = 0; i < debugTextPool.initData.Length; ++i ) {
