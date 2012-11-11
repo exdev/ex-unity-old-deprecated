@@ -209,6 +209,21 @@ public class exGameObjectPool {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+    public void Clear () {
+        for ( int i = 0; i < size; ++i ) {
+            if ( initData[i] ) {
+                Game.DestroyObject ( initData[i] );
+            }
+        }
+        idx = 0;
+        initData = null;
+        data = null;
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
     public void Reset () {
         for ( int i = 0; i < size; ++i ) {
             data[i] = initData[i];
