@@ -191,6 +191,7 @@ public class exDebugHelper : MonoBehaviour {
             }
         }
     }
+    public TextAnchor fpsAnchor = TextAnchor.UpperLeft;
 
     // timescale
     [SerializeField] protected bool enableTimeScaleDebug_ = true;
@@ -328,8 +329,56 @@ public class exDebugHelper : MonoBehaviour {
         if ( showFps ) {
             content = new GUIContent(txtFPS);
             size = fpsStyle.CalcSize(content);
+
+            //
+            switch ( fpsAnchor ) {
+                //
+            case TextAnchor.UpperLeft: 
+                break;
+
+            case TextAnchor.UpperCenter: 
+                curX = curX + (Screen.width - size.x) * 0.5f; 
+                break;
+
+            case TextAnchor.UpperRight: 
+                curX = Screen.width - size.x - curX; 
+                break;
+
+                //
+            case TextAnchor.MiddleLeft: 
+                curY = curY + (Screen.height - size.y) * 0.5f;
+                break;
+
+            case TextAnchor.MiddleCenter:
+                curX = curX + (Screen.width - size.x) * 0.5f; 
+                curY = curY + (Screen.height - size.y) * 0.5f;
+                break;
+
+            case TextAnchor.MiddleRight:
+                curX = Screen.width - size.x - curX; 
+                curY = curY + (Screen.height - size.y) * 0.5f;
+                break;
+
+                //
+            case TextAnchor.LowerLeft:
+                curY = Screen.height - size.y - curY;
+                break;
+
+            case TextAnchor.LowerCenter:
+                curX = curX + (Screen.width - size.x) * 0.5f; 
+                curY = Screen.height - size.y - curY;
+                break;
+
+            case TextAnchor.LowerRight:
+                curX = Screen.width - size.x - curX; 
+                curY = Screen.height - size.y - curY;
+                break;
+            }
+
             GUI.Label ( new Rect( curX, curY, size.x, size.y ), txtFPS, fpsStyle );
-            curY += size.y;
+
+            curX = 10.0f;
+            curY = 10.0f + size.y;
         }
 
         if ( enableTimeScaleDebug ) {

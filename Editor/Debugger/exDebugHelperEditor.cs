@@ -37,6 +37,7 @@ public class exDebugHelperEditor : Editor {
 #else
     SerializedProperty printStyleProp;
     SerializedProperty fpsStyleProp;
+    SerializedProperty fpsAnchorProp;
     SerializedProperty logStyleProp;
     SerializedProperty timeScaleStyleProp;
 #endif
@@ -62,6 +63,7 @@ public class exDebugHelperEditor : Editor {
 #else
         printStyleProp = serializedObject.FindProperty ("printStyle");
         fpsStyleProp = serializedObject.FindProperty ("fpsStyle");
+        fpsAnchorProp = serializedObject.FindProperty ("fpsAnchor");
         logStyleProp = serializedObject.FindProperty ("logStyle");
         timeScaleStyleProp = serializedObject.FindProperty ("timeScaleStyle");
 #endif
@@ -104,6 +106,8 @@ public class exDebugHelperEditor : Editor {
             EditorGUILayout.PropertyField (fpsStyleProp, true);
             EditorGUILayout.PropertyField (logStyleProp, true);
             EditorGUILayout.PropertyField (timeScaleStyleProp, true);
+
+            EditorGUILayout.PropertyField (fpsAnchorProp, true);
 #endif
         serializedObject.ApplyModifiedProperties();
 
