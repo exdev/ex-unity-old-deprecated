@@ -1,0 +1,3 @@
+[submodule "Assets/exUnity"]
+	path = Assets/exUnity
+	url = git@github.com:jwu/exUnity.git
