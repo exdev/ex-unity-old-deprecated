@@ -212,7 +212,7 @@ public class exGameObjectPool {
     public void Clear () {
         for ( int i = 0; i < size; ++i ) {
             if ( initData[i] ) {
-                Game.DestroyObject ( initData[i] );
+                GameObject.DestroyObject ( initData[i] );
             }
         }
         idx = 0;
@@ -306,7 +306,7 @@ public class exGameObjectPool {
  
     public void Return ( GameObject _item ) {
         ++idx;
-        // _item.gameObject.SetActiveRecursively(false);
+        // _item.gameObject.SetActive(false); // DISABLE
         data[idx] = _item;
     }
 }

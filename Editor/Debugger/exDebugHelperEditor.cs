@@ -77,7 +77,7 @@ public class exDebugHelperEditor : Editor {
 
         EditorGUIUtility.LookLikeInspector ();
         EditorGUILayout.Space ();
-        EditorGUI.indentLevel = 0;
+        EditorGUI.indentLevel = 1;
 
         // ======================================================== 
         // pool settings 

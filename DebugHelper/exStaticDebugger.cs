@@ -79,5 +79,46 @@ public static class exStaticDebugger {
         DrawCircleY ( _center, _radius, _color, _duration, _depthTets );
         DrawCircleZ ( _center, _radius, _color, _duration, _depthTets );
     }
+
+    // ------------------------------------------------------------------ 
+    // Desc: GizmosDrawCircle
+    // ------------------------------------------------------------------ 
+
+    // DrawCircleX
+    public static void GizmosDrawCircleX ( Vector3 _center, float _radius, Color _color ) {
+        GizmosDrawCircle ( Quaternion.Euler(0.0f,0.0f,90.0f), _center, _radius, _color );
+    }
+
+    // DrawCircleY
+    public static void GizmosDrawCircleY ( Vector3 _center, float _radius, Color _color ) {
+        GizmosDrawCircle ( Quaternion.identity, _center, _radius, _color );
+    }
+
+    // DrawCircleZ
+    public static void GizmosDrawCircleZ ( Vector3 _center, float _radius, Color _color ) {
+        GizmosDrawCircle ( Quaternion.Euler(90.0f,0.0f,0.0f), _center, _radius, _color );
+    }
+
+    // 
+    public static void GizmosDrawCircle ( Quaternion _rot, Vector3 _center, float _radius, Color _color ) {
+        //
+        float two_pi = 2.0f * Mathf.PI;
+        float segments = 32.0f;
+        float step = two_pi / segments;
+        float theta = 0.0f;
+
+        //
+        Vector3 last = _center + _rot * ( _radius * new Vector3( Mathf.Cos(theta), 0.0f, Mathf.Sin(theta) ) );
+        theta += step;
+
+        //
+        for ( int i = 1; i <= segments; ++i ) {
+            Vector3 cur = _center + _rot * ( _radius * new Vector3( Mathf.Cos(theta), 0.0f, Mathf.Sin(theta) ) );
+            Gizmos.color = _color;
+            Gizmos.DrawLine ( last, cur );
+            last = cur;
+            theta += step;
+        }
+    }
 }
 
