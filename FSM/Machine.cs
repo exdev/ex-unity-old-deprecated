@@ -28,8 +28,6 @@ namespace fsm {
             Stopped
         }
 
-        public delegate void OnEventHandler ();
-
         // DEBUG { 
         public bool showDebugInfo = true;
         public bool logDebugInfo = false;
@@ -39,8 +37,8 @@ namespace fsm {
         // public
         ///////////////////////////////////////////////////////////////////////////////
 
-        public OnEventHandler onStart;
-        public OnEventHandler onStop;
+        public System.Action onStart;
+        public System.Action onStop;
 
         ///////////////////////////////////////////////////////////////////////////////
         // non-serializable
@@ -49,11 +47,7 @@ namespace fsm {
         protected MachineState machineState = MachineState.Stopped;
 
         protected State startState = new State( "fsm_start" ); // NOTE: startState is different than initState, startState --transition--> initState 
-        protected List<Event>[] eventBuffer = new List<Event>[2] { new List<Event>(), new List<Event>() };
-        protected int curEventBufferIdx = 0; 
-        protected int nextEventBufferIdx = 1; 
         protected bool isUpdating = false; 
-        protected List<Transition> validTransitions = new List<Transition>(); 
 
         ///////////////////////////////////////////////////////////////////////////////
         // functions
@@ -90,10 +84,9 @@ namespace fsm {
             if ( onStart != null )
                 onStart ();
 
-            Event nullEvent = new Event( Event.NULL );  
             if ( mode == State.Mode.Exclusive ) {
                 if ( initState != null ) {
-                    EnterStates( nullEvent, initState, startState );
+                    EnterStates( initState, startState );
                 }
                 else {
                     Debug.LogError( "FSM error: can't find initial state in " + name );
@@ -101,7 +94,7 @@ namespace fsm {
             }
             else { // if ( _toEnter.mode == State.Mode.Parallel )
                 for ( int i = 0; i < children.Count; ++i ) {
-                    EnterStates( nullEvent, children[i], startState );
+                    EnterStates( children[i], startState );
                 }
             }
         }
@@ -126,9 +119,14 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
+        public void Pause () { machineState = MachineState.Paused; }
+        public void Resume () { machineState = MachineState.Running; }
+
+        // ------------------------------------------------------------------ 
+        // Desc: 
+        // ------------------------------------------------------------------ 
+
         protected void ProcessStop () {
-            eventBuffer[0].Clear();
-            eventBuffer[1].Clear();
             ClearCurrentStatesRecursively();
 
             if ( onStop != null )
@@ -150,30 +148,17 @@ namespace fsm {
 
             // update machine if it is not stopping
             if ( machineState != MachineState.Stopping ) {
-                // now switch event list
-                int tmp = curEventBufferIdx;
-                curEventBufferIdx = nextEventBufferIdx;
-                nextEventBufferIdx = tmp;
-
                 //
                 bool doStop = false;
-                List<Event> eventList = eventBuffer[curEventBufferIdx];
-                // Debug.Log( "eventList [" + curEventBufferIdx + "] = " + eventList.Count );
-                for ( int i = 0; i < eventList.Count; ++i ) {
-                    // if we can stop the machine, ignore rest events and do stop
-                    if ( HandleEvent (eventList[i]) ) {
-                        doStop = true;
-                        break;
-                    }
-                }
-                eventList.Clear();
+
+                //
+                CheckConditions (); // invoke Transition.onCheck, also invoke State.onExit
+                OnAction (); // invoke State.onAction
+                UpdateTransitions (); // invoke Transition.onTransition, also invoke State.onEnter
 
                 // on event in current states 
                 if ( doStop ) {
                     Stop ();
-                }
-                else {
-                    OnAction ();
                 }
             }
 
@@ -189,101 +174,14 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public void Pause () { machineState = MachineState.Paused; }
-        public void Resume () { machineState = MachineState.Running; }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        protected bool HandleEvent ( Event _event ) {
-            // on event in current states 
-            OnEvent (_event);
-
-            // 
-            validTransitions.Clear();
-            TestTransitions ( ref validTransitions, _event );
-
-            //
-            ExitStates ( _event, validTransitions ); // invoke State.OnExit
-            ExecTransitions ( _event, validTransitions ); // invoke Transition.OnTransition
-            EnterStates ( _event, validTransitions ); // invoke State.OnEnter
-
-            // check if we need to stop the stateMachine
-            if ( _event.id == Event.FINISHED ) {
-                bool canStop = true;
-                for ( int i = 0; i < currentStates.Count; ++i ) {
-                    if ( (currentStates[i] is FinalState) == false ) {
-                        canStop = false;
-                        break;
-                    }
-                }
-                if ( canStop ) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public void Send ( int _eventID ) { Send ( new Event(_eventID) ); }
-        public void Send ( Event _event ) { 
-            if ( machineState == MachineState.Stopped )
-                return;
-            eventBuffer[nextEventBufferIdx].Add (_event); 
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        protected void EnterStates ( Event _event, List<Transition> _transitionList ) {
-            for ( int i = 0; i < _transitionList.Count; ++i ) {
-                Transition transition = _transitionList[i];
-                State targetState = transition.target;
-                if ( targetState == null )
-                    targetState = transition.source;
-                targetState.parent.EnterStates ( _event, targetState, transition.source );
-            }
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        protected void ExitStates ( Event _event, List<Transition> _transitionList ) {
-            for ( int i = 0; i < _transitionList.Count; ++i ) {
-                Transition transition = _transitionList[i];
-                transition.source.parent.ExitStates ( _event, transition.target, transition.source );
-            }
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        protected void ExecTransitions ( Event _event, List<Transition> _transitionList ) {
-            for ( int i = 0; i < _transitionList.Count; ++i ) {
-                Transition transition = _transitionList[i];
-                transition.OnTransition (_event);
-            }
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
         public void ShowDebugGUI ( string _name, GUIStyle _textStyle ) {
             GUILayout.Label( "State Machine (" + _name + ")" );
             showDebugInfo = GUILayout.Toggle( showDebugInfo, "Show States" );
             logDebugInfo = GUILayout.Toggle( logDebugInfo, "Log States" );
-                if ( showDebugInfo ) {
-                    ShowDebugInfo ( 0, true, _textStyle );
-                }
+
+            if ( showDebugInfo ) {
+                ShowDebugInfo ( 0, true, _textStyle );
+            }
         }
     }
 }

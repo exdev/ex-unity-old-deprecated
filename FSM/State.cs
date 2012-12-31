@@ -31,15 +31,12 @@ namespace fsm {
             Parallel,
         }
 
-        public delegate void TransitionEventHandler ( State _from, State _to, Event _event );
-        public delegate void OnEventHandler ( State _curState, Event _event );
-        public delegate void OnActionHandler ( State _curState );
-
         ///////////////////////////////////////////////////////////////////////////////
         // properties
         ///////////////////////////////////////////////////////////////////////////////
 
         public string name = "";
+        public Mode mode = Mode.Exclusive;
 
         protected State parent_ = null;
         public State parent {
@@ -108,22 +105,19 @@ namespace fsm {
             }
         }
 
-        public Mode mode = Mode.Exclusive;
-        public List<Transition> transitionList = new List<Transition>();
-        protected List<State> currentStates = new List<State>();
+        protected List<Transition> transitionList = new List<Transition>();
         protected List<State> children = new List<State>();
+
+        protected Transition currentTransition = null;
+        protected List<State> currentStates = new List<State>();
 
         ///////////////////////////////////////////////////////////////////////////////
         // event handles
         ///////////////////////////////////////////////////////////////////////////////
 
-        public TransitionEventHandler onEnter;
-        public TransitionEventHandler onExit;
-        public OnEventHandler onEvent;
-        public OnActionHandler onAction;
-
-        // public System.EventHandler<Event> onEvent;  // void EventHandler ( object _sender, Event _event )
-        // public System.EventHandler onAction;        // void ActionHandler ( object _sender )
+        public System.Action<State,State> onEnter = null;
+        public System.Action<State,State> onExit = null;
+        public System.Action<State> onAction = null;
 
         ///////////////////////////////////////////////////////////////////////////////
         // functions
@@ -153,21 +147,14 @@ namespace fsm {
         // Desc: add transition
         // ------------------------------------------------------------------ 
 
-        public T Add<T> ( State _targetState ) where T : Transition, new() {
-            T newTranstion = new T();
+        public T Add<T> ( State _targetState, System.Func<bool> _onCheck = null, System.Func<bool> _onTransition = null ) where T : Transition, new() {
+            T newTranstion = new T ();
             newTranstion.source = this;
             newTranstion.target = _targetState;
+            if ( _onCheck != null ) newTranstion.onCheck = _onCheck;
+            if ( _onTransition != null ) newTranstion.onTransition = _onTransition;
+
             transitionList.Add ( newTranstion );
-            return newTranstion;
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: add transition
-        // ------------------------------------------------------------------ 
-
-        public T Add<T> ( State _targetState, int _id ) where T : EventTransition, new() {
-            T newTranstion = Add<T> (_targetState);
-            newTranstion.eventID = _id;
             return newTranstion;
         }
 
@@ -176,16 +163,15 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         public void OnAction () { 
-            if ( onAction != null ) { 
-                onAction ( this );         
-            } 
+            if ( onAction != null ) onAction ( this );         
+
             for ( int i = 0; i < currentStates.Count; ++i ) {
                 currentStates[i].OnAction ();
 
-                // TEMP { 
+                // DISABLE { 
                 // if ( machine != null && machine.logDebugInfo ) 
                 //     Debug.Log( "FSM Debug: On Action - " + currentStates[i].name + " at " + Time.time );
-                // } TEMP end 
+                // } DISABLE end 
             }
         } 
 
@@ -193,35 +179,32 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public void OnEvent ( Event _event ) { 
-            if ( onEvent != null ) { 
-                onEvent ( this, _event );         
-            } 
-            for ( int i = 0; i < currentStates.Count; ++i ) {
-                currentStates[i].OnEvent (_event);
-            }
-        }
+        public void CheckConditions () {
+            // if we are in transtion, don't do anything
+            if ( currentTransition != null )
+                return;
 
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public void TestTransitions ( ref List<Transition> _validTransitions, Event _event ) {
+            //
             for ( int i = 0; i < currentStates.Count; ++i ) {
                 State activeChild = currentStates[i];
 
                 // NOTE: if parent transition triggerred, the child should always execute onExit transition
-                bool hasTranstion = false;
                 for ( int j = 0; j < activeChild.transitionList.Count; ++j ) {
                     Transition transition = activeChild.transitionList[j];
-                    if ( transition.TestEvent (_event) ) {
-                        _validTransitions.Add (transition);
-                        hasTranstion = true;
+                    if ( transition.onCheck() ) {
+
+                        // exit states
+                        transition.source.parent.ExitStates ( transition.target, transition.source );
+
+                        // set current transition
+                        currentTransition = transition;
+
                         break;
                     }
                 }
-                if ( !hasTranstion ) {
-                    activeChild.TestTransitions ( ref _validTransitions, _event );
+
+                if ( currentTransition == null ) {
+                    activeChild.CheckConditions ();
                 }
             }
         }
@@ -230,16 +213,46 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public void EnterStates ( Event _event, State _toEnter, State _toExit ) {
+        public void UpdateTransitions () {
+            if ( currentTransition != null ) {
+                // update transition
+                if ( currentTransition.onTransition() ) {
+
+                    // enter states
+                    State targetState = currentTransition.target;
+                    if ( targetState == null )
+                        targetState = currentTransition.source;
+                    targetState.parent.EnterStates ( targetState, currentTransition.source );
+
+                    //
+                    currentTransition = null;
+                }
+            }
+            else {
+                for ( int i = 0; i < currentStates.Count; ++i ) {
+                    State activeChild = currentStates[i];
+                    activeChild.UpdateTransitions();
+                }
+            }
+        }
+
+        // ------------------------------------------------------------------ 
+        // Desc: 
+        // ------------------------------------------------------------------ 
+
+        public void EnterStates ( State _toEnter, State _toExit ) {
             currentStates.Add (_toEnter);
+
             if ( machine != null && machine.logDebugInfo ) 
                 Debug.Log( "FSM Debug: Enter State - " + _toEnter.name + " at " + Time.time );
-            _toEnter.OnEnter ( _toExit, _toEnter, _event );
+
+            if ( _toEnter.onEnter != null )
+                _toEnter.onEnter ( _toExit, _toEnter );
 
             if ( _toEnter.children.Count != 0 ) {
                 if ( _toEnter.mode == State.Mode.Exclusive ) {
                     if ( _toEnter.initState != null ) {
-                        _toEnter.EnterStates( _event, _toEnter.initState, _toExit );
+                        _toEnter.EnterStates( _toEnter.initState, _toExit );
                     }
                     else {
                         Debug.LogError( "FSM error: can't find initial state in " + _toEnter.name );
@@ -247,7 +260,7 @@ namespace fsm {
                 }
                 else { // if ( _toEnter.mode == State.Mode.Parallel )
                     for ( int i = 0; i < _toEnter.children.Count; ++i ) {
-                        _toEnter.EnterStates( _event, _toEnter.children[i], _toExit );
+                        _toEnter.EnterStates( _toEnter.children[i], _toExit );
                     }
                 }
             }
@@ -257,11 +270,15 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        public void ExitStates ( Event _event, State _toEnter, State _toExit ) {
-            _toExit.ExitAllStates ( _event, _toEnter );
+        public void ExitStates ( State _toEnter, State _toExit ) {
+            _toExit.ExitAllStates ( _toEnter );
+
             if ( machine != null && machine.logDebugInfo ) 
                 Debug.Log( "FSM Debug: Exit State - " + _toExit.name + " at " + Time.time );
-            _toExit.OnExit ( _toExit, _toEnter, _event );
+
+            if ( _toExit.onExit != null )
+                _toExit.onExit ( _toExit, _toEnter );
+
             currentStates.Remove (_toExit);
         }
 
@@ -269,35 +286,19 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        protected void ExitAllStates ( Event _event, State _toEnter ) {
+        protected void ExitAllStates ( State _toEnter ) {
             for ( int i = 0; i < currentStates.Count; ++i ) {
+
                 State activeChild = currentStates[i];
-                activeChild.ExitAllStates ( _event, _toEnter );
-                activeChild.OnExit ( activeChild, _toEnter, _event );
+                activeChild.ExitAllStates ( _toEnter );
+
+                if ( activeChild.onExit != null )
+                    activeChild.onExit ( activeChild, _toEnter );
+
                 if ( machine != null && machine.logDebugInfo ) 
                     Debug.Log( "FSM Debug: Exit State - " + activeChild.name + " at " + Time.time );
             }
             currentStates.Clear();
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public void OnEnter ( State _from, State _to, Event _event ) { 
-            if ( onEnter != null ) { 
-                onEnter ( _from, _to, _event );  
-            }
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public void OnExit ( State _from, State _to, Event _event ) { 
-            if ( onExit != null ) { 
-                onExit ( _from, _to, _event );    
-            }
         }
 
         // ------------------------------------------------------------------ 
@@ -351,11 +352,13 @@ namespace fsm {
         // Desc: 
         // ------------------------------------------------------------------ 
 
-        void OnFinished ( State _from, State _to, Event _event ) {
-            Machine stateMachine = machine;
-            if ( stateMachine != null ) {
-                stateMachine.Send ( Event.FINISHED );
-            }
+        void OnFinished ( State _from, State _to ) {
+            // TODO { 
+            // Machine stateMachine = machine;
+            // if ( stateMachine != null ) {
+            //     stateMachine.Send ( Event.FINISHED );
+            // }
+            // } TODO end 
         }
     }
 }

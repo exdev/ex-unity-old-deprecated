@@ -25,15 +25,9 @@ namespace fsm {
     [System.Serializable]
     public class Transition {
 
-        public delegate bool TestEventHandler ( Transition _trans, Event _event );
-        public delegate void TransitionHandler ( Transition _trans, Event _event );
-
         ///////////////////////////////////////////////////////////////////////////////
         // properties
         ///////////////////////////////////////////////////////////////////////////////
-
-        public State source = null;
-        public State target = null;
 
         public Machine machine {
             get {
@@ -43,67 +37,10 @@ namespace fsm {
             }
         }
 
-        ///////////////////////////////////////////////////////////////////////////////
-        // handler
-        ///////////////////////////////////////////////////////////////////////////////
-
-        public TestEventHandler onTestEvent; 
-        public TransitionHandler onTransition; 
-
-        ///////////////////////////////////////////////////////////////////////////////
-        // functions
-        ///////////////////////////////////////////////////////////////////////////////
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public virtual bool TestEvent ( Event _event ) { 
-            if ( onTestEvent != null )
-                return onTestEvent ( this, _event );
-            return true; 
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public virtual void OnTransition ( Event _event ) {
-            if ( onTransition != null )
-                onTransition ( this, _event );
-        }
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // EventTransition
-    ///////////////////////////////////////////////////////////////////////////////
-
-    [System.Serializable]
-    public class EventTransition : Transition {
-        public int eventID = -1;
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public EventTransition () {
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public EventTransition ( int _eventID ) {
-            eventID = _eventID;
-        }
-
-        // ------------------------------------------------------------------ 
-        // Desc: 
-        // ------------------------------------------------------------------ 
-
-        public override bool TestEvent ( Event _event ) { 
-            return _event.id == eventID; 
-        }
+        public State source = null;
+        public State target = null;
+        public System.Func<bool> onCheck = delegate () { return false; }; 
+        public System.Func<bool> onTransition = delegate () { return true; }; 
     }
 }
 
