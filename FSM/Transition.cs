@@ -40,7 +40,10 @@ namespace fsm {
         public State source = null;
         public State target = null;
         public System.Func<bool> onCheck = delegate () { return false; }; 
+
+        public System.Action onStart = null;
         public System.Func<bool> onTransition = delegate () { return true; }; 
+        public System.Action onEnd = null;
     }
 }
 

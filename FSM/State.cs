@@ -147,12 +147,19 @@ namespace fsm {
         // Desc: add transition
         // ------------------------------------------------------------------ 
 
-        public T Add<T> ( State _targetState, System.Func<bool> _onCheck = null, System.Func<bool> _onTransition = null ) where T : Transition, new() {
+        public T Add<T> ( State _targetState, 
+                          System.Func<bool> _onCheck = null, 
+                          System.Action _onStart = null,
+                          System.Func<bool> _onTransition = null,
+                          System.Action _onEnd = null ) where T : Transition, new() {
             T newTranstion = new T ();
             newTranstion.source = this;
             newTranstion.target = _targetState;
             if ( _onCheck != null ) newTranstion.onCheck = _onCheck;
+
+            if ( _onStart != null ) newTranstion.onStart = _onStart;
             if ( _onTransition != null ) newTranstion.onTransition = _onTransition;
+            if ( _onEnd != null ) newTranstion.onEnd = _onEnd;
 
             transitionList.Add ( newTranstion );
             return newTranstion;
@@ -196,6 +203,9 @@ namespace fsm {
                         // exit states
                         transition.source.parent.ExitStates ( transition.target, transition.source );
 
+                        // transition on start
+                        if ( transition.onStart != null ) transition.onStart();
+
                         // set current transition
                         currentTransition = transition;
 
@@ -217,6 +227,9 @@ namespace fsm {
             if ( currentTransition != null ) {
                 // update transition
                 if ( currentTransition.onTransition() ) {
+
+                    // transition on end
+                    if ( currentTransition.onEnd != null ) currentTransition.onEnd();
 
                     // enter states
                     State targetState = currentTransition.target;
