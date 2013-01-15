@@ -108,6 +108,7 @@ namespace fsm {
         protected List<Transition> transitionList = new List<Transition>();
         protected List<State> children = new List<State>();
 
+        protected bool inTransition = false;
         protected Transition currentTransition = null;
         protected List<State> currentStates = new List<State>();
 
@@ -188,7 +189,7 @@ namespace fsm {
 
         public void CheckConditions () {
             // if we are in transtion, don't do anything
-            if ( currentTransition != null )
+            if ( inTransition )
                 return;
 
             //
@@ -208,12 +209,13 @@ namespace fsm {
 
                         // set current transition
                         currentTransition = transition;
+                        inTransition = true;
 
                         break;
                     }
                 }
 
-                if ( currentTransition == null ) {
+                if ( inTransition == false ) {
                     activeChild.CheckConditions ();
                 }
             }
@@ -224,7 +226,7 @@ namespace fsm {
         // ------------------------------------------------------------------ 
 
         public void UpdateTransitions () {
-            if ( currentTransition != null ) {
+            if ( inTransition ) {
                 // update transition
                 if ( currentTransition.onTransition() ) {
 
@@ -235,10 +237,16 @@ namespace fsm {
                     State targetState = currentTransition.target;
                     if ( targetState == null )
                         targetState = currentTransition.source;
-                    targetState.parent.EnterStates ( targetState, currentTransition.source );
+
+                    if ( targetState.parent != null )
+                        targetState.parent.EnterStates ( targetState, currentTransition.source );
+                    else {
+                        Debug.Log( "targetState = " + targetState.name + ", " + name );
+                    }
 
                     //
                     currentTransition = null;
+                    inTransition = false;
                 }
             }
             else {
