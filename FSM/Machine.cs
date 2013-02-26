@@ -247,7 +247,9 @@ namespace fsm {
                 State targetState = transition.target;
                 if ( targetState == null )
                     targetState = transition.source;
-                targetState.parent.EnterStates ( _event, targetState, transition.source );
+
+                if ( targetState.parent != null )
+                    targetState.parent.EnterStates ( _event, targetState, transition.source );
             }
         }
 
@@ -258,7 +260,9 @@ namespace fsm {
         protected void ExitStates ( Event _event, List<Transition> _transitionList ) {
             for ( int i = 0; i < _transitionList.Count; ++i ) {
                 Transition transition = _transitionList[i];
-                transition.source.parent.ExitStates ( _event, transition.target, transition.source );
+
+                if ( transition.source.parent != null )
+                    transition.source.parent.ExitStates ( _event, transition.target, transition.source );
             }
         }
 

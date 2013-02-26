@@ -306,7 +306,7 @@ public class exGameObjectPool {
  
     public void Return ( GameObject _item ) {
         ++idx;
-        // _item.gameObject.SetActiveRecursively(false);
+        // _item.gameObject.SetActive(false);
         data[idx] = _item;
     }
 }
