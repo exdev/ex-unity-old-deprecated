@@ -106,6 +106,8 @@ public class exDebugHelper : MonoBehaviour {
     // serialized
     ///////////////////////////////////////////////////////////////////////////////
 
+    public Vector2 offset = new Vector2 ( 10.0f, 10.0f );
+
 #if EX2D
     public exSpriteFont txtPrint;
     public exSpriteFont txtFPS;
@@ -331,8 +333,8 @@ public class exDebugHelper : MonoBehaviour {
     void OnGUI () {
         GUIContent content = null;
         Vector2 size = Vector2.zero;
-        float curX = 10.0f;
-        float curY = 10.0f;
+        float curX = offset.x;
+        float curY = offset.y;
 
         if ( showFps ) {
             content = new GUIContent(txtFPS);

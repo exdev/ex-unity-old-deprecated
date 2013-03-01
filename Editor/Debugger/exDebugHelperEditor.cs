@@ -28,6 +28,9 @@ public class exDebugHelperEditor : Editor {
     ///////////////////////////////////////////////////////////////////////////////
 
     exDebugHelper curEdit;
+
+    SerializedProperty offsetProp;
+
 #if EX2D
     SerializedProperty debugTextPoolProp;
     SerializedProperty txtPrintProp;
@@ -54,6 +57,7 @@ public class exDebugHelperEditor : Editor {
         if ( target != curEdit ) {
             curEdit = target as exDebugHelper;
         }
+        offsetProp = serializedObject.FindProperty ("offset");
 #if EX2D
         debugTextPoolProp = serializedObject.FindProperty ("debugTextPool");
         txtPrintProp = serializedObject.FindProperty ("txtPrint");
@@ -84,6 +88,7 @@ public class exDebugHelperEditor : Editor {
         // ======================================================== 
 
         serializedObject.Update();
+            EditorGUILayout.PropertyField (offsetProp, true);
 #if EX2D
             if ( EditorGUILayout.PropertyField ( debugTextPoolProp, new GUIContent("Debug Text Pool") ) ) 
             {
