@@ -75,6 +75,7 @@ public class exDebugHelper : MonoBehaviour {
     // ------------------------------------------------------------------ 
     // Desc: 
     // ------------------------------------------------------------------ 
+
     public enum LogType {
         None,
         Normal,
@@ -101,6 +102,25 @@ public class exDebugHelper : MonoBehaviour {
             }
         }
     }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    public static void SetFPSColor ( Color _color ) {
+#if EX2D
+        exSpriteFont.topColor = _color;
+        exSpriteFont.botColor = _color;
+#else
+        instance.fpsStyle.normal.textColor = _color;
+#endif
+    }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
+    public static float GetFPS () { return instance.fps; }
 
     ///////////////////////////////////////////////////////////////////////////////
     // serialized
@@ -455,12 +475,6 @@ public class exDebugHelper : MonoBehaviour {
         txtFPS = "fps: " + fps.ToString("f2");
 #endif
     }
-
-    // ------------------------------------------------------------------ 
-    // Desc: 
-    // ------------------------------------------------------------------ 
-
-    public float GetFPS () { return fps; }
 
     // ------------------------------------------------------------------ 
     // Desc: 
