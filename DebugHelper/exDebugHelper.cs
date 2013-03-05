@@ -460,6 +460,12 @@ public class exDebugHelper : MonoBehaviour {
     // Desc: 
     // ------------------------------------------------------------------ 
 
+    public float GetFPS () { return fps; }
+
+    // ------------------------------------------------------------------ 
+    // Desc: 
+    // ------------------------------------------------------------------ 
+
     public void ResetCamera ( Camera _camera ) {
 #if EX2D
         txtFPS.renderCamera = _camera;
