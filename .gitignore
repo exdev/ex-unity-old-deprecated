@@ -28,6 +28,7 @@
 
 .DS_Store
 ehthumbs.db
+<<<<<<< HEAD
 Thumbs.db
 
 #/////////////////////////////////////////////////////////////////////////////
@@ -58,6 +59,18 @@ Assets/MecAnim_Sample.meta
 
 ios_build/*
 _build/*
+=======
+Icon
+Thumbs.db
+
+#/////////////////////////////////////////////////////////////////////////////
+# internal builds
+#/////////////////////////////////////////////////////////////////////////////
+
+doc/
+build/
+packages/
+>>>>>>> d8a2f2f5110cd8bf229212cd9f15d6d82b34bfcf
 
 #/////////////////////////////////////////////////////////////////////////////
 # exvim files 
@@ -69,6 +82,10 @@ _log/
 *.vimentry.meta
 .vimfiles.*/
 quick_gen_project_*_autogen.bat
+<<<<<<< HEAD
 quick_gen_project_*_autogen.bat.meta
 quick_gen_project_*_autogen.sh
 quick_gen_project_*_autogen.sh.meta
+=======
+quick_gen_project_*_autogen.sh
+>>>>>>> d8a2f2f5110cd8bf229212cd9f15d6d82b34bfcf
