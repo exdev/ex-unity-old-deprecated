@@ -68,7 +68,7 @@ public class exTimebasedCurve {
     public float speed = 1.0f;
     [System.NonSerialized] public float time = 0.0f; 
 
-    private exEase.easeCallback callback;
+    private System.Func<float,float> callback;
     private float lastTime = 0.0f; 
     private bool timeup = false;
     private bool started = false;
@@ -85,7 +85,7 @@ public class exTimebasedCurve {
     public void Start ( bool _rewind = false, float _duration = -1.0f ) {
         duration = (_duration <= 0.0f) ? data.length : _duration;
 
-        callback = data.useEaseCurve ? exEase.TypeToFunction(data.easeCurveType) : data.animationCurve.Evaluate;
+        callback = data.useEaseCurve ? exEase.GetEaseFunc(data.easeCurveType) : data.animationCurve.Evaluate;
         lastTime = Time.time;
         if ( _rewind || started == false ) {
             if ( speed < 0.0f )
@@ -130,17 +130,17 @@ public class exTimebasedCurve {
         bool inverse = (speed < 0.0f); 
         if ( timeup ) {
             if ( inverse )
-                return 0.0f;
+                return callback(0.0f);
             else
-                return 1.0f;
+                return callback(1.0f);
         }
 
         if ( started == false ) {
             Debug.LogWarning( "the curve didn't started, please call curve.Start() first" );
             if ( inverse )
-                return 1.0f;
+                return callback(1.0f);
             else
-                return 0.0f;
+                return callback(0.0f);
         }
 
         float curTime = Time.time;
@@ -149,9 +149,6 @@ public class exTimebasedCurve {
 
         //
         time += deltaTime * speed;
-
-        //
-        float wrappedTime = data.WrapSeconds(time, duration, data.wrapMode);
 
         // check if stop
         if ( data.wrapMode == exTimebasedCurveInfo.WrapMode.Once ) {
@@ -162,17 +159,18 @@ public class exTimebasedCurve {
                 started = false;
                 if ( inverse ) {
                     time = 0.0f;
-                    return 0.0f;
+                    return callback(0.0f);
                 }
                 else {
                     time = duration;
-                    return 1.0f;
+                    return callback(1.0f);
                 }
             }
         }
 
         //
-        float ratio = Mathf.Clamp ( wrappedTime/duration, 0.0f, 1.0f );
+        float wrappedTime = data.WrapSeconds(time, duration, data.wrapMode);
+        float ratio = wrappedTime/duration;
         return callback(ratio);
     }
 }
