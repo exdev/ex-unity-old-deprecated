@@ -285,5 +285,11 @@ namespace fsm {
                     ShowDebugInfo ( 0, true, _textStyle );
                 }
         }
+
+        // ------------------------------------------------------------------ 
+        // Desc: 
+        // ------------------------------------------------------------------ 
+
+        protected MachineState GetCurrentMachineState () { return machineState; }
     }
 }
